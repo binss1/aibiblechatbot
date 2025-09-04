@@ -6,10 +6,14 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "postbuild": "next-sitemap",
     "lint": "next lint",
     "format": "prettier --write .",
     "prepare": "husky",
-    "db:check": "tsx src/lib/scripts/db-check.ts"
+    "db:check": "tsx src/lib/scripts/db-check.ts",
+    "db:init-bible": "tsx src/lib/scripts/init-bible-data.ts",
+    "db:init-bible-only": "tsx src/lib/scripts/init-bible-data-only.ts",
+    "db:clear-bible": "tsx src/lib/scripts/clear-bible-data.ts"
   },
   "dependencies": {
     "react": "^19.0.0",

@@ -1,0 +1,353 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+```markdown
+## Code Guidelines for AI Chatbot Project
+
+### 1. Project Overview
+
+This project involves a 성경 기반 AI 상담 챗봇 (Bible-based AI Counseling Chatbot) built using React and React Native for the frontend, Node.js with Express for the backend, MongoDB Atlas for data storage, and OpenAI GPT for AI-powered counseling. The application provides users with relevant Bible verses and personalized guidance based on their concerns.
+
+Key architectural decisions include:
+
+- **Monorepo Structure:**  A monorepo managed by a tool like Yarn Workspaces or Nx will be used to manage shared code between the React web app, React Native mobile app, and Node.js backend.
+- **RESTful API:** Backend exposes RESTful APIs for frontend communication.
+- **Vector Database:** MongoDB Atlas will store embeddings of Bible verses for semantic search.
+- **OpenAI Integration:**  OpenAI's GPT models are used for natural language understanding and generation of counseling responses.
+
+### 2. Core Principles
+
+- **Readability:** Code should be easy to understand and maintain by any team member.
+- **Testability:** Code should be written in a way that facilitates unit and integration testing.
+- **Performance:** Code should be optimized for speed and efficiency to ensure a responsive user experience.
+- **Security:**  Code should be written with security in mind to protect user data and prevent vulnerabilities.
+- **Modularity:**  Code should be organized into reusable components and modules to promote maintainability and scalability.
+
+### 3. Language-Specific Guidelines
+
+#### TypeScript
+
+- **File Organization:**
+  - Group related components, types, interfaces, and utility functions into dedicated directories.
+  - Use `index.ts` files to re-export members from a directory, creating a clear API for the module.
+
+```typescript
+// Example: src/components/Chat/index.ts
+export { ChatComponent } from './ChatComponent';
+export { Message } from './Message';
+export type { MessageType } from './types';
+```
+
+- **Import/Dependency Management:**
+  - Use absolute imports for internal modules to improve readability and prevent import errors when refactoring. Configure your bundler (Webpack, Metro) to resolve imports from the `src` directory.
+  - Specify versions for all dependencies in `package.json` and use a lockfile (yarn.lock, package-lock.json) to ensure consistent dependency versions across environments.
+  - Avoid circular dependencies. Use dependency injection or other techniques to break cycles.
+
+```typescript
+// MUST: Absolute import (assuming src is the root)
+import { ChatComponent } from 'components/Chat/ChatComponent';
+
+// MUST NOT: Relative import (prone to errors when refactoring)
+// import { ChatComponent } from '../../../components/Chat/ChatComponent';
+```
+
+- **Error Handling Patterns:**
+  - Use `try...catch` blocks to handle synchronous errors.
+  - Use `.catch()` to handle asynchronous errors with Promises.
+  - Create custom error classes to represent specific error conditions and provide more context.
+  - Implement a centralized error logging and reporting mechanism.
+
+```typescript
+// Example: Error handling with try...catch
+try {
+  const result = await fetchData();
+  console.log('Data:', result);
+} catch (error: any) {
+  console.error('Error fetching data:', error.message);
+  // Log error to a centralized service
+}
+```
+
+#### React / React Native
+
+- **File Organization:**
+    - Separate components into functional and class components based on complexity and state management needs. Favor functional components with hooks for simplicity.
+    - Use a `components` directory to store reusable UI components.
+    - Use a `screens` or `pages` directory to store top-level components that represent different views in the application.
+    - Use a `hooks` directory for custom React hooks.
+    - Use a `utils` directory for utility functions.
+
+```
+src/
+├── components/
+│   ├── Button/
+│   │   ├── Button.tsx
+│   │   └── Button.styles.ts
+│   └── ChatMessage/
+│       ├── ChatMessage.tsx
+│       └── ChatMessage.styles.ts
+├── screens/
+│   ├── HomeScreen.tsx
+│   └── ChatScreen.tsx
+├── hooks/
+│   └── useAuthentication.ts
+└── utils/
+    └── api.ts
+```
+
+- **Component Structure:**
+  - Create small, reusable components.
+  - Use composition over inheritance.
+  - Use PropTypes (for JavaScript) or TypeScript interfaces/types to define the props for each component.
+  - Use consistent naming conventions for components and props.
+  - Style components using CSS-in-JS libraries (styled-components, Emotion) or CSS Modules for better maintainability and scoping.
+
+```typescript
+// Example: React Functional Component with TypeScript
+interface ButtonProps {
+  text: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+
+const Button: React.FC<ButtonProps> = ({ text, onClick, disabled }) => {
+  return (
+    <button onClick={onClick} disabled={disabled}>
+      {text}
+    </button>
+  );
+};
+
+export default Button;
+```
+
+- **State Management:**
+  - Use React Context API for simple global state management.
+  - Consider using Redux or Zustand for more complex state management needs.
+  - Keep state immutable.  Use spread operator or `Object.assign()` to create new objects/arrays instead of modifying them directly.
+
+```typescript
+// Example: useState with immutable updates
+const [messages, setMessages] = useState<MessageType[]>([]);
+
+const addMessage = (newMessage: MessageType) => {
+  setMessages([...messages, newMessage]); // Correct: Creates a new array
+  // setMessages(messages.push(newMessage)); // Incorrect: Modifies the original array
+};
+```
+
+#### Node.js / Express
+
+- **File Organization:**
+  - Use a modular architecture with separate directories for controllers, models, routes, and services.
+  - Use `src` directory for all application code.
+  - Use a `config` directory for configuration files.
+  - Use a `middlewares` directory for Express middleware functions.
+
+```
+src/
+├── controllers/
+│   ├── chatController.ts
+│   └── userController.ts
+├── models/
+│   ├── chatModel.ts
+│   └── userModel.ts
+├── routes/
+│   ├── chatRoutes.ts
+│   └── userRoutes.ts
+├── services/
+│   ├── chatService.ts
+│   └── userService.ts
+├── config/
+│   └── database.ts
+├── middlewares/
+│   └── authentication.ts
+└── app.ts
+```
+
+- **Import/Dependency Management:**
+  - Use `npm` or `yarn` to manage dependencies.
+  - Specify versions for all dependencies in `package.json` and use a lockfile to ensure consistent dependency versions across environments.
+  - Use environment variables for configuration values.
+
+```javascript
+// Example: Accessing environment variables
+const port = process.env.PORT || 3000;
+const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/chatbot';
+```
+
+- **Error Handling Patterns:**
+  - Use `try...catch` blocks to handle synchronous errors.
+  - Use `.catch()` to handle asynchronous errors with Promises.
+  - Use Express middleware to handle errors globally.
+  - Implement a centralized error logging and reporting mechanism.
+
+```javascript
+// Example: Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  // Log error to a centralized service
+  res.status(500).send('Something broke!');
+});
+```
+
+#### MongoDB Atlas
+
+- **Schema Design:**
+    - Design schemas carefully to optimize for common queries.
+    - Use indexes to improve query performance.
+    - Consider using MongoDB's aggregation pipeline for complex queries.
+- **Data Validation:**
+    - Use Mongoose schema validation to ensure data integrity.
+    - Implement server-side validation to prevent invalid data from being stored in the database.
+- **Connection Management:**
+    - Use a connection pool to efficiently manage database connections.
+    - Handle connection errors gracefully.
+
+#### OpenAI GPT
+
+- **API Usage:**
+    - Use the OpenAI API client library to interact with the GPT models.
+    - Handle API rate limits and errors gracefully.
+    - Implement caching to reduce API calls and improve performance.
+- **Prompt Engineering:**
+    - Design prompts carefully to elicit the desired responses from the GPT models.
+    - Use clear and concise language in prompts.
+    - Experiment with different prompts to optimize for accuracy and relevance.
+
+#### Firebase Cloud Messaging
+
+- **Configuration:** Configure Firebase Cloud Messaging correctly for both Android and iOS platforms.
+- **Token Management:** Implement a mechanism to securely store and manage device tokens.
+- **Error Handling:** Handle FCM errors gracefully and provide informative error messages to the user.
+
+### 4. Code Style Rules
+
+#### MUST Follow:
+
+- **ESLint and Prettier:** Use ESLint with a consistent configuration (e.g., Airbnb, Google) to enforce code style and detect potential errors. Use Prettier to automatically format code.  Integrate ESLint and Prettier into your editor and CI/CD pipeline.
+  *Rationale:* Ensures consistent code style across the project, reducing cognitive load and improving readability.
+- **Meaningful Names:** Use descriptive and meaningful names for variables, functions, and classes.
+  *Rationale:* Improves code readability and makes it easier to understand the purpose of each element.
+- **Code Comments:** Write clear and concise comments to explain complex logic or non-obvious code.  Focus on *why* the code is written the way it is, not *what* the code does.
+  *Rationale:* Helps other developers (and your future self) understand the code's intent and purpose.
+- **DRY (Don't Repeat Yourself):** Avoid duplicating code. Extract common logic into reusable functions or components.
+  *Rationale:* Reduces code size, improves maintainability, and reduces the risk of introducing bugs.
+- **Single Responsibility Principle (SRP):** Each function, class, or module should have a single, well-defined responsibility.
+  *Rationale:* Makes code easier to understand, test, and maintain.
+- **Use Async/Await:**  Prefer `async/await` syntax over traditional Promise chains for asynchronous operations.
+  *Rationale:* Improves code readability and makes asynchronous code easier to reason about.
+- **Type Safety (TypeScript):**  Use TypeScript's type system to enforce type safety and prevent runtime errors. Define interfaces and types for all data structures.
+  *Rationale:* Reduces the risk of runtime errors, improves code reliability, and makes it easier to refactor code.
+- **Error Handling:**  Implement robust error handling to prevent application crashes and provide informative error messages to the user.
+  *Rationale:* Improves application stability and provides a better user experience.
+- **Security Best Practices:**  Follow security best practices to protect user data and prevent vulnerabilities.
+  *Rationale:* Prevents security breaches and protects user privacy.
+- **Limit line length:** Keep lines under 120 characters for readability.
+  *Rationale:* Improves code readability, especially on smaller screens or when working with multiple files side-by-side.
+
+```typescript
+// MUST: Good example with clear naming and comments
+/**
+ * Fetches a Bible verse from the database based on its ID.
+ * @param verseId The ID of the Bible verse to fetch.
+ * @returns A Promise that resolves to the Bible verse object, or null if not found.
+ */
+async function fetchBibleVerse(verseId: string): Promise<BibleVerse | null> {
+  try {
+    const verse = await BibleVerseModel.findById(verseId);
+    return verse;
+  } catch (error: any) {
+    console.error(`Error fetching verse ${verseId}:`, error.message);
+    return null;
+  }
+}
+```
+
+#### MUST NOT Do:
+
+- **Ignoring ESLint Warnings/Errors:**  Address all ESLint warnings and errors before committing code.
+  *Rationale:* Ensures code quality and prevents potential bugs.
+- **Using `any` Type (TypeScript):**  Avoid using the `any` type in TypeScript.  Always try to define a more specific type.
+  *Rationale:* Defeats the purpose of using TypeScript and reduces type safety.
+- **Mutating Props Directly (React):**  Never modify props directly within a React component.  Props are read-only.
+  *Rationale:* Can lead to unpredictable behavior and performance issues.
+- **Using `console.log` in Production:**  Remove all `console.log` statements from production code.
+  *Rationale:* Can expose sensitive information and degrade performance.
+- **Hardcoding Configuration Values:**  Never hardcode configuration values (e.g., API keys, database URLs) in code.  Use environment variables instead.
+  *Rationale:* Improves security and makes it easier to configure the application for different environments.
+- **Ignoring Errors:**  Do not ignore errors.  Always handle errors gracefully and log them appropriately.
+  *Rationale:* Prevents application crashes and provides valuable information for debugging.
+- **Writing excessively long functions:** Functions should ideally fit within a single screen. Break down complex logic into smaller, more manageable functions.
+  *Rationale:* Improves code readability and maintainability.
+- **Committing commented-out code:** Remove commented-out code before committing. Use version control to track changes.
+  *Rationale:* Keeps the codebase clean and avoids confusion.
+
+```typescript
+// MUST NOT: Bad example with unclear naming and no comments
+// async function getVerse(id) {
+//   try {
+//     const v = await db.findById(id);
+//     return v;
+//   } catch (e) {
+//     return null;
+//   }
+// }
+
+// MUST NOT: Using `any` type
+function processData(data: any) { // Avoid 'any'
+  // ...
+}
+
+// MUST: Correct way to type data
+interface User {
+  name: string;
+  age: number;
+}
+
+function processData(data: User) {
+  // ...
+}
+```
+
+### 5. Architecture Patterns
+
+- **Component/Module Structure:**
+  - **Atomic Design:**  Consider using Atomic Design principles to structure React components into atoms, molecules, organisms, templates, and pages.
+  - **Feature-Based Modules:**  Organize code into feature-based modules, where each module contains all the code related to a specific feature (e.g., chat, user authentication).
+
+- **Data Flow Patterns:**
+  - **Unidirectional Data Flow:**  Follow a unidirectional data flow pattern in React, where data flows from parent components to child components via props, and changes are propagated back up via callbacks.
+  - **RESTful APIs:**  Use RESTful APIs for communication between the frontend and backend.
+
+- **State Management Conventions:**
+  - **Context API:** Use React's Context API for managing application-wide state, such as user authentication status or theme settings.
+  - **Redux/Zustand:**  Consider using Redux or Zustand for managing more complex application state.  Define clear actions, reducers, and selectors.
+
+- **API Design Standards:**
+  - **RESTful Principles:**  Adhere to RESTful principles when designing APIs.
+  - **JSON Format:**  Use JSON for request and response bodies.
+  - **Consistent Naming:**  Use consistent naming conventions for API endpoints and request/response fields.
+  - **Versioning:**  Use API versioning to ensure backward compatibility.
+  - **Authentication and Authorization:**  Implement robust authentication and authorization mechanisms to protect API endpoints.
+
+```javascript
+// Example: RESTful API endpoint for fetching a Bible verse
+// GET /api/v1/verses/:id
+app.get('/api/v1/verses/:id', async (req, res) => {
+  try {
+    const verseId = req.params.id;
+    const verse = await BibleVerseModel.findById(verseId);
+    if (!verse) {
+      return res.status(404).json({ message: 'Verse not found' });
+    }
+    res.json(verse);
+  } catch (error: any) {
+    console.error(`Error fetching verse ${req.params.id}:`, error.message);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+```
+

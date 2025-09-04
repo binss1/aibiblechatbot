@@ -7,6 +7,7 @@ export interface ChatRecordDocument extends Document {
   verses?: Array<{ book: string; chapter: number; verse: number; text?: string }>; // optional attached verses
   createdAt: Date;
   embeddings?: number[];
+  prayer?: string;
 }
 
 const chatRecordSchema = new Schema<ChatRecordDocument>(
@@ -24,6 +25,7 @@ const chatRecordSchema = new Schema<ChatRecordDocument>(
       },
     ],
     embeddings: { type: [Number], default: undefined },
+    prayer: { type: String },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
