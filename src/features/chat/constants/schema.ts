@@ -25,5 +25,3 @@ export const chatResponseSchema = z.object({
 });
 
 export type ChatResponse = z.infer<typeof chatResponseSchema>;
-
-

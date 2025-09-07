@@ -1,11 +1,13 @@
-"use client";
+'use client';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
 import HistoryDetailSheet from './HistoryDetailSheet';
 import { MessageCircle, BookOpenText, Hand } from 'lucide-react';
 
-interface Props { sessionId: string }
+interface Props {
+  sessionId: string;
+}
 
 export default function History({ sessionId }: Props) {
   const [q, setQ] = useState<string>('');
@@ -15,36 +17,35 @@ export default function History({ sessionId }: Props) {
   const [selected, setSelected] = useState<undefined | any>(undefined);
   const [bookmarks, setBookmarks] = useState<Set<string>>(() => new Set());
 
-  const {
-    data,
-    isLoading,
-    error,
-    fetchNextPage,
-    hasNextPage,
-    refetch,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ['history', sessionId, q, from, to],
-    queryFn: async ({ pageParam }) => {
-      const qs = new URLSearchParams({ sessionId });
-      if (pageParam) qs.set('cursor', pageParam as string);
-      qs.set('limit', '20');
-      if (q) qs.set('q', q);
-      if (from) qs.set('from', from);
-      if (to) qs.set('to', to);
-      const res = await fetch(`/api/history?${qs.toString()}`);
-      if (!res.ok) throw new Error('기록을 불러오지 못했습니다');
-      return (await res.json()) as {
-        items: Array<{ role: string; content: string; createdAt: string; verses?: Array<{ book: string; chapter: number; verse: number }>; prayer?: string }>;
-        nextCursor?: string;
-      };
-    },
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-    initialPageParam: undefined,
-  });
+  const { data, isLoading, error, fetchNextPage, hasNextPage, refetch, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ['history', sessionId, q, from, to],
+      queryFn: async ({ pageParam }) => {
+        const qs = new URLSearchParams({ sessionId });
+        if (pageParam) qs.set('cursor', pageParam as string);
+        qs.set('limit', '20');
+        if (q) qs.set('q', q);
+        if (from) qs.set('from', from);
+        if (to) qs.set('to', to);
+        const res = await fetch(`/api/history?${qs.toString()}`);
+        if (!res.ok) throw new Error('기록을 불러오지 못했습니다');
+        return (await res.json()) as {
+          items: Array<{
+            role: string;
+            content: string;
+            createdAt: string;
+            verses?: Array<{ book: string; chapter: number; verse: number }>;
+            prayer?: string;
+          }>;
+          nextCursor?: string;
+        };
+      },
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+      initialPageParam: undefined,
+    });
 
   const sentinelRef = useRef<HTMLDivElement | null>(null);
-  
+
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
@@ -68,16 +69,20 @@ export default function History({ sessionId }: Props) {
 
   const highlight = (text: string, keyword: string) => {
     if (!keyword) return <>{text}</>;
-    const parts = text.split(new RegExp(`(${keyword.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'gi'));
+    const parts = text.split(
+      new RegExp(`(${keyword.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')})`, 'gi'),
+    );
     return (
       <>
-        {parts.map((p, i) => (
+        {parts.map((p, i) =>
           p.toLowerCase() === keyword.toLowerCase() ? (
-            <mark key={i} className="bg-yellow-200 text-foreground px-0.5 rounded">{p}</mark>
+            <mark key={i} className="bg-yellow-200 text-foreground px-0.5 rounded">
+              {p}
+            </mark>
           ) : (
             <span key={i}>{p}</span>
-          )
-        ))}
+          ),
+        )}
       </>
     );
   };
@@ -92,18 +97,19 @@ export default function History({ sessionId }: Props) {
       arr.push(it);
       map.set(day, arr);
     }
-    return Array.from(map.entries()).sort(([a],[b]) => (a < b ? -1 : 1));
+    return Array.from(map.entries()).sort(([a], [b]) => (a < b ? -1 : 1));
   }, [items]);
 
-  if (isLoading) return (
-    <div className="space-y-2">
-      <div className="h-3 w-24 bg-muted rounded animate-pulse" />
-      <div className="h-2 w-full bg-muted rounded animate-pulse" />
-      <div className="h-2 w-3/4 bg-muted rounded animate-pulse" />
-      <div className="h-2 w-2/3 bg-muted rounded animate-pulse" />
-    </div>
-  );
-  
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        <div className="h-3 w-24 bg-muted rounded animate-pulse" />
+        <div className="h-2 w-full bg-muted rounded animate-pulse" />
+        <div className="h-2 w-3/4 bg-muted rounded animate-pulse" />
+        <div className="h-2 w-2/3 bg-muted rounded animate-pulse" />
+      </div>
+    );
+
   if (error) return <div className="text-sm text-red-600">기록 로드 실패</div>;
 
   return (
@@ -117,9 +123,21 @@ export default function History({ sessionId }: Props) {
             placeholder="검색"
             className="h-6 px-2 rounded border bg-background text-xs"
           />
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-6 px-2 rounded border bg-background text-xs" />
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-6 px-2 rounded border bg-background text-xs" />
-          <button className="text-xs underline" onClick={() => refetch()}>새로고침</button>
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="h-6 px-2 rounded border bg-background text-xs"
+          />
+          <input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="h-6 px-2 rounded border bg-background text-xs"
+          />
+          <button className="text-xs underline" onClick={() => refetch()}>
+            새로고침
+          </button>
         </div>
       </div>
       <div className="space-y-3 max-h-60 overflow-auto pr-1">
@@ -128,7 +146,14 @@ export default function History({ sessionId }: Props) {
             <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{day}</div>
             <ul className="space-y-1">
               {group.map((it, i) => (
-                <li key={i} className="text-xs text-muted-foreground cursor-pointer" onClick={() => { setSelected(it); setDetailOpen(true); }}>
+                <li
+                  key={i}
+                  className="text-xs text-muted-foreground cursor-pointer"
+                  onClick={() => {
+                    setSelected(it);
+                    setDetailOpen(true);
+                  }}
+                >
                   <div className="flex items-start gap-2 p-2 rounded-md border bg-background/50">
                     <div className="mt-0.5 text-foreground">
                       {it.role === 'user' ? (
@@ -146,9 +171,7 @@ export default function History({ sessionId }: Props) {
                           {formatDistanceToNow(new Date(it.createdAt), { addSuffix: true })}
                         </span>
                       </div>
-                      <div className="text-foreground/90">
-                        {highlight(it.content, q)}
-                      </div>
+                      <div className="text-foreground/90">{highlight(it.content, q)}</div>
                       <div className="flex flex-wrap items-center gap-3">
                         {it.verses?.length ? (
                           <span className="inline-flex items-center gap-1 text-[10px] bg-muted px-2 py-0.5 rounded-full">
@@ -177,11 +200,14 @@ export default function History({ sessionId }: Props) {
           onClick={() => {
             const rows = items.map((it) => ({
               role: it.role,
-              content: it.content.replaceAll('\n',' '),
+              content: it.content.replaceAll('\n', ' '),
               createdAt: it.createdAt,
             }));
             const header = 'role,content,createdAt';
-            const csv = [header, ...rows.map(r => `${r.role},"${r.content}",${r.createdAt}`)].join('\n');
+            const csv = [
+              header,
+              ...rows.map((r) => `${r.role},"${r.content}",${r.createdAt}`),
+            ].join('\n');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -190,7 +216,9 @@ export default function History({ sessionId }: Props) {
             a.click();
             URL.revokeObjectURL(url);
           }}
-        >CSV 내보내기</button>
+        >
+          CSV 내보내기
+        </button>
       </div>
       <HistoryDetailSheet open={detailOpen} onOpenChange={setDetailOpen} item={selected as any} />
       {isFetchingNextPage && (
@@ -199,5 +227,3 @@ export default function History({ sessionId }: Props) {
     </div>
   );
 }
-
-

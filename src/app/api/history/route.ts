@@ -9,10 +9,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const sessionId = searchParams.get('sessionId') || '';
   const cursor = searchParams.get('cursor'); // ISO string of createdAt
   const limitParam = Number(searchParams.get('limit') || '20');
-  const limit = Number.isFinite(limitParam) && limitParam > 0 && limitParam <= 100 ? limitParam : 20;
+  const limit =
+    Number.isFinite(limitParam) && limitParam > 0 && limitParam <= 100 ? limitParam : 20;
   const q = searchParams.get('q')?.trim();
   const from = searchParams.get('from'); // ISO date
-  const to = searchParams.get('to');     // ISO date
+  const to = searchParams.get('to'); // ISO date
   if (!sessionId) {
     return NextResponse.json({ message: 'sessionId is required' }, { status: 400 });
   }
@@ -43,5 +44,3 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const nextCursor = hasMore ? items[items.length - 1]?.createdAt : undefined;
   return NextResponse.json({ items, nextCursor });
 }
-
-

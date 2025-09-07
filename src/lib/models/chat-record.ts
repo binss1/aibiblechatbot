@@ -36,5 +36,3 @@ chatRecordSchema.index({ 'verses.book': 1, 'verses.chapter': 1, 'verses.verse': 
 export const ChatRecord: Model<ChatRecordDocument> =
   (mongoose.models.ChatRecord as Model<ChatRecordDocument>) ||
   mongoose.model<ChatRecordDocument>('ChatRecord', chatRecordSchema);
-
-

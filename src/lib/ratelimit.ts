@@ -28,5 +28,3 @@ export const allowRequest = (key: Key): boolean => {
   keyToBucket.set(key, bucket);
   return true;
 };
-
-

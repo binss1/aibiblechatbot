@@ -25,7 +25,3 @@ export const disconnectFromDatabase = async (): Promise<void> => {
     isConnected = false;
   }
 };
-
-
-
-

@@ -24,23 +24,27 @@
 ## 🚀 기술 스택
 
 ### 웹 애플리케이션
+
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **UI/UX**: Tailwind CSS, shadcn/ui, Lucide Icons
 - **State Management**: Zustand, React Query
 - **Form Handling**: React Hook Form, Zod
 
 ### 모바일 애플리케이션
+
 - **Framework**: React Native + Expo
 - **Navigation**: React Navigation Stack
 - **UI Components**: Expo Vector Icons, Linear Gradient
 
 ### 백엔드 & 데이터베이스
+
 - **API**: Next.js API Routes
 - **Database**: MongoDB Atlas
 - **AI Service**: OpenAI GPT-4o-mini, OpenAI Embeddings
 - **Authentication**: JWT (향후 구현 예정)
 
 ### 배포 & 인프라
+
 - **Containerization**: Docker
 - **Cloud Platform**: Railway (무료 티어)
 - **Environment**: Node.js 18+
@@ -147,12 +151,14 @@ npm run ios      # iOS 시뮬레이터 (macOS 필요)
 ## 📱 사용법
 
 ### 웹 애플리케이션
+
 1. 브라우저에서 `http://localhost:3000` 접속
 2. 고민을 입력하고 "지금 상담 시작하기" 클릭
 3. AI가 성경적 조언과 관련 구절을 제공
 4. 상담 기록은 "상담 기록 보기"에서 확인
 
 ### 모바일 애플리케이션
+
 1. Expo Go 앱 설치 (iOS/Android)
 2. `npx expo start` 실행 후 QR 코드 스캔
 3. 웹과 동일한 기능을 모바일에서 이용

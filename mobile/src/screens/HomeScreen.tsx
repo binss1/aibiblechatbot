@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -18,6 +19,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const insets = useSafeAreaInsets();
   const features = [
     {
       icon: 'shield-checkmark' as const,
@@ -41,14 +43,14 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
   const testimonials = [
     {
-      quote: "직장에서의 갈등으로 힘들었는데, 성경적 지혜를 통해 새로운 관점을 얻었습니다.",
-      name: "김민수",
-      role: "회사원, 35세"
+      quote: '직장에서의 갈등으로 힘들었는데, 성경적 지혜를 통해 새로운 관점을 얻었습니다.',
+      name: '김민수',
+      role: '회사원, 35세',
     },
     {
-      quote: "자녀 양육의 어려움 속에서 성경적 원리를 적용할 수 있는 실질적인 조언을 받았습니다.",
-      name: "이지영", 
-      role: "주부, 42세"
+      quote: '자녀 양육의 어려움 속에서 성경적 원리를 적용할 수 있는 실질적인 조언을 받았습니다.',
+      name: '이지영',
+      role: '주부, 42세',
     },
   ];
 
@@ -56,26 +58,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <LinearGradient
-          colors={['#EBF8FF', '#F0F9FF', '#E0F2FE']}
-          style={styles.heroSection}
-        >
+        <LinearGradient colors={['#EBF8FF', '#F0F9FF', '#E0F2FE']} style={styles.heroSection}>
           <View style={styles.heroContent}>
             <View style={styles.badge}>
               <Ionicons name="sparkles" size={16} color="#1E40AF" />
               <Text style={styles.badgeText}>성경 기반 AI 상담</Text>
             </View>
-            
+
             <Text style={styles.heroTitle}>
               당신의 고민에{'\n'}
               <Text style={styles.heroTitleHighlight}>성경적 답변</Text>을
             </Text>
-            
+
             <Text style={styles.heroDescription}>
               30대 이상 직장인·가정을 위한 AI 상담 챗봇.{'\n'}
               성경 말씀을 바탕으로 한 따뜻한 조언과 기도 제목을 제공합니다.
             </Text>
-            
+
             <View style={styles.buttonContainer}>
               <TouchableOpacity
                 style={styles.primaryButton}
@@ -84,7 +83,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 <Ionicons name="chatbubbles" size={20} color="white" />
                 <Text style={styles.primaryButtonText}>지금 상담 시작하기</Text>
               </TouchableOpacity>
-              
+
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={() => navigation.navigate('History')}
@@ -102,7 +101,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Text style={styles.sectionDescription}>
             성경 말씀을 바탕으로 한 AI 상담 서비스는 당신의 일상에 실질적인 도움을 드립니다
           </Text>
-          
+
           <View style={styles.featuresGrid}>
             {features.map((feature, index) => (
               <View key={index} style={[styles.featureCard, { borderLeftColor: feature.color }]}>
@@ -122,7 +121,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Text style={styles.sectionDescription}>
             성경 기반 AI 상담을 통해 위로와 지혜를 얻은 분들의 소중한 경험
           </Text>
-          
+
           <View style={styles.testimonialsGrid}>
             {testimonials.map((testimonial, index) => (
               <View key={index} style={styles.testimonialCard}>
@@ -142,16 +141,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         {/* CTA Section */}
         <LinearGradient
           colors={['#3B82F6', '#1E40AF']}
-          style={styles.ctaSection}
+          style={[styles.ctaSection, { paddingBottom: Math.max(insets.bottom, 40) }]}
         >
           <Text style={styles.ctaTitle}>성경적 지혜로 더 나은 삶을 살아가세요</Text>
           <Text style={styles.ctaDescription}>
             매일의 고민과 결정에 성경의 지혜를 적용하여 더 풍요로운 삶을 경험하세요
           </Text>
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => navigation.navigate('Chat')}
-          >
+          <TouchableOpacity style={styles.ctaButton} onPress={() => navigation.navigate('Chat')}>
             <Ionicons name="chatbubbles" size={20} color="#3B82F6" />
             <Text style={styles.ctaButtonText}>무료로 상담 시작하기</Text>
             <Ionicons name="chevron-forward" size={20} color="#3B82F6" />

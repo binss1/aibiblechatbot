@@ -26,7 +26,7 @@ export async function generateBibleEmbedding(text: string): Promise<number[]> {
       model: 'text-embedding-3-small',
       input: text,
     });
-    
+
     return response.data[0].embedding;
   } catch (error) {
     console.error('Error generating embedding:', error);
@@ -39,31 +39,31 @@ export async function generateBibleEmbedding(text: string): Promise<number[]> {
  */
 export async function searchRelevantVerses(
   userInput: string,
-  limit: number = 5
+  limit: number = 5,
 ): Promise<BibleSearchResult[]> {
   try {
     // 사용자 입력에 대한 임베딩 생성
     const userEmbedding = await generateBibleEmbedding(userInput);
-    
+
     // MongoDB에서 임베딩이 있는 성경 구절들을 가져와서 코사인 유사도 계산
-    const verses = await BibleVerse.find({ 
-      embeddings: { $exists: true, $ne: null } 
+    const verses = await BibleVerse.find({
+      embeddings: { $exists: true, $ne: null },
     }).limit(1000); // 성능을 위해 제한
-    
+
     if (verses.length === 0) {
       return [];
     }
-    
+
     // 코사인 유사도 계산
-    const similarities = verses.map(verse => {
+    const similarities = verses.map((verse) => {
       if (!verse.embeddings || verse.embeddings.length === 0) {
         return { verse, similarity: 0 };
       }
-      
+
       const similarity = cosineSimilarity(userEmbedding, verse.embeddings);
       return { verse, similarity };
     });
-    
+
     // 유사도 순으로 정렬하고 상위 결과 반환
     return similarities
       .sort((a, b) => b.similarity - a.similarity)
@@ -88,24 +88,24 @@ function cosineSimilarity(a: number[], b: number[]): number {
   if (a.length !== b.length) {
     throw new Error('벡터의 차원이 일치하지 않습니다.');
   }
-  
+
   let dotProduct = 0;
   let normA = 0;
   let normB = 0;
-  
+
   for (let i = 0; i < a.length; i++) {
     dotProduct += a[i] * b[i];
     normA += a[i] * a[i];
     normB += b[i] * b[i];
   }
-  
+
   normA = Math.sqrt(normA);
   normB = Math.sqrt(normB);
-  
+
   if (normA === 0 || normB === 0) {
     return 0;
   }
-  
+
   return dotProduct / (normA * normB);
 }
 
@@ -118,7 +118,7 @@ export async function updateVerseEmbedding(verseId: string): Promise<void> {
     if (!verse) {
       throw new Error('성경 구절을 찾을 수 없습니다.');
     }
-    
+
     const embedding = await generateBibleEmbedding(verse.text);
     verse.embeddings = embedding;
     await verse.save();
@@ -133,30 +133,33 @@ export async function updateVerseEmbedding(verseId: string): Promise<void> {
  */
 export async function generateAllVerseEmbeddings(): Promise<void> {
   try {
-    const verses = await BibleVerse.find({ 
-      embeddings: { $exists: false } 
+    const verses = await BibleVerse.find({
+      embeddings: { $exists: false },
     });
-    
+
     console.log(`${verses.length}개의 성경 구절에 대한 임베딩을 생성합니다...`);
-    
+
     for (let i = 0; i < verses.length; i++) {
       const verse = verses[i];
       try {
         const embedding = await generateBibleEmbedding(verse.text);
         verse.embeddings = embedding;
         await verse.save();
-        
+
         if ((i + 1) % 10 === 0) {
           console.log(`${i + 1}/${verses.length} 완료`);
         }
-        
+
         // API 호출 제한을 위한 지연
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
       } catch (error) {
-        console.error(`구절 ${verse.book} ${verse.chapter}:${verse.verse} 임베딩 생성 실패:`, error);
+        console.error(
+          `구절 ${verse.book} ${verse.chapter}:${verse.verse} 임베딩 생성 실패:`,
+          error,
+        );
       }
     }
-    
+
     console.log('모든 임베딩 생성이 완료되었습니다.');
   } catch (error) {
     console.error('Error generating all embeddings:', error);

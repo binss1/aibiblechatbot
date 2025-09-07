@@ -12,6 +12,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Message, ChatResponse } from '../types';
 import { chatApi } from '../services/api';
 
@@ -25,6 +26,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => `mobile-${Date.now()}`);
   const flatListRef = useRef<FlatList>(null);
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     // Auto-scroll to bottom when messages change
@@ -44,7 +46,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
       content: message,
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputText('');
     setIsLoading(true);
 
@@ -61,7 +63,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
         prayer: response.prayer,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Chat error:', error);
       Alert.alert('오류', '메시지 전송에 실패했습니다. 다시 시도해주세요.');
@@ -75,7 +77,9 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
     const isLastMessage = index === messages.length - 1;
 
     return (
-      <View style={[styles.messageContainer, isUser ? styles.userMessage : styles.assistantMessage]}>
+      <View
+        style={[styles.messageContainer, isUser ? styles.userMessage : styles.assistantMessage]}
+      >
         {!isUser && (
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
@@ -83,12 +87,12 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
             </View>
           </View>
         )}
-        
+
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
           <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
             {item.content}
           </Text>
-          
+
           {!isUser && item.verses && item.verses.length > 0 && (
             <View style={styles.versesContainer}>
               {item.verses.map((verse, idx) => (
@@ -101,7 +105,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
               ))}
             </View>
           )}
-          
+
           {!isUser && item.prayer && (
             <View style={styles.prayerContainer}>
               <View style={styles.prayerHeader}>
@@ -111,24 +115,21 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
               <Text style={styles.prayerText}>{item.prayer}</Text>
             </View>
           )}
-          
+
           {isLoading && isLastMessage && (
             <View style={styles.loadingContainer}>
               <View style={styles.loadingDots}>
                 {[1, 2, 3].map((dot) => (
                   <View
                     key={dot}
-                    style={[
-                      styles.loadingDot,
-                      { animationDelay: `${dot * 0.15}s` }
-                    ]}
+                    style={[styles.loadingDot, { animationDelay: `${dot * 0.15}s` }]}
                   />
                 ))}
               </View>
             </View>
           )}
         </View>
-        
+
         {isUser && (
           <View style={styles.avatarContainer}>
             <View style={[styles.avatar, styles.userAvatar]}>
@@ -152,19 +153,15 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
       <View style={styles.examplePrompts}>
         <TouchableOpacity
           style={styles.examplePrompt}
-          onPress={() => setInputText("요즘 너무 지쳐요. 성경적 위로가 필요해요.")}
+          onPress={() => setInputText('요즘 너무 지쳐요. 성경적 위로가 필요해요.')}
         >
-          <Text style={styles.examplePromptText}>
-            "요즘 너무 지쳐요. 성경적 위로가 필요해요."
-          </Text>
+          <Text style={styles.examplePromptText}>"요즘 너무 지쳐요. 성경적 위로가 필요해요."</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.examplePrompt}
-          onPress={() => setInputText("하나님의 뜻을 어떻게 알 수 있을까요?")}
+          onPress={() => setInputText('하나님의 뜻을 어떻게 알 수 있을까요?')}
         >
-          <Text style={styles.examplePromptText}>
-            "하나님의 뜻을 어떻게 알 수 있을까요?"
-          </Text>
+          <Text style={styles.examplePromptText}>"하나님의 뜻을 어떻게 알 수 있을까요?"</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -185,8 +182,8 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
           ListEmptyComponent={renderEmptyState}
           showsVerticalScrollIndicator={false}
         />
-        
-        <View style={styles.inputContainer}>
+
+        <View style={[styles.inputContainer, { paddingBottom: Math.max(insets.bottom, 12) }]}>
           <View style={styles.inputWrapper}>
             <TextInput
               style={styles.textInput}
@@ -200,7 +197,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
             <TouchableOpacity
               style={[
                 styles.sendButton,
-                (!inputText.trim() || isLoading) && styles.sendButtonDisabled
+                (!inputText.trim() || isLoading) && styles.sendButtonDisabled,
               ]}
               onPress={sendMessage}
               disabled={!inputText.trim() || isLoading}
@@ -208,7 +205,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
               <Ionicons
                 name="send"
                 size={20}
-                color={(!inputText.trim() || isLoading) ? '#9CA3AF' : 'white'}
+                color={!inputText.trim() || isLoading ? '#9CA3AF' : 'white'}
               />
             </TouchableOpacity>
           </View>

@@ -1,6 +1,16 @@
 import { ChatRequest, ChatResponse } from '../types';
 
-const API_BASE_URL = 'https://your-domain.railway.app'; // 배포 후 실제 도메인으로 변경
+// 환경에 따른 API URL 설정
+const getApiBaseUrl = () => {
+  if (__DEV__) {
+    // 개발 환경에서는 컴퓨터의 IP 주소 사용
+    return 'http://192.168.0.10:3000';
+  }
+  // 프로덕션 환경에서는 배포된 URL 사용
+  return 'https://your-domain.railway.app';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const chatApi = {
   async sendMessage(request: ChatRequest): Promise<ChatResponse> {
@@ -28,8 +38,10 @@ export const chatApi = {
 
   async getHistory(sessionId: string, limit: number = 20) {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/history?sessionId=${sessionId}&limit=${limit}`);
-      
+      const response = await fetch(
+        `${API_BASE_URL}/api/history?sessionId=${sessionId}&limit=${limit}`,
+      );
+
       if (!response.ok) {
         throw new Error('히스토리 조회 실패');
       }
@@ -50,5 +62,5 @@ export const chatApi = {
       console.error('Health check failed:', error);
       return false;
     }
-  }
+  },
 };

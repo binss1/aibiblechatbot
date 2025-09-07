@@ -45,7 +45,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
 
   const onRefresh = async () => {
     if (!sessionId.trim()) return;
-    
+
     setIsRefreshing(true);
     await loadHistory(sessionId);
     setIsRefreshing(false);
@@ -59,17 +59,19 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
       <View style={[styles.historyItem, isUser ? styles.userItem : styles.assistantItem]}>
         <View style={styles.historyHeader}>
           <View style={[styles.roleBadge, isUser ? styles.userBadge : styles.assistantBadge]}>
-            <Text style={[styles.roleText, isUser ? styles.userRoleText : styles.assistantRoleText]}>
+            <Text
+              style={[styles.roleText, isUser ? styles.userRoleText : styles.assistantRoleText]}
+            >
               {isUser ? '나' : 'AI'}
             </Text>
           </View>
           <Text style={styles.timestamp}>{date}</Text>
         </View>
-        
+
         <Text style={[styles.content, isUser ? styles.userContent : styles.assistantContent]}>
           {item.content}
         </Text>
-        
+
         {!isUser && item.verses && item.verses.length > 0 && (
           <View style={styles.versesContainer}>
             {item.verses.map((verse, idx) => (
@@ -82,7 +84,7 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
             ))}
           </View>
         )}
-        
+
         {!isUser && item.prayer && (
           <View style={styles.prayerContainer}>
             <View style={styles.prayerHeader}>
@@ -120,16 +122,24 @@ export default function HistoryScreen({ navigation }: HistoryScreenProps) {
           />
         </View>
         <TouchableOpacity
-          style={[styles.searchButton, (!sessionId.trim() || isLoading) && styles.searchButtonDisabled]}
+          style={[
+            styles.searchButton,
+            (!sessionId.trim() || isLoading) && styles.searchButtonDisabled,
+          ]}
           onPress={() => loadHistory(sessionId)}
           disabled={!sessionId.trim() || isLoading}
         >
           <Ionicons
             name="search"
             size={20}
-            color={(!sessionId.trim() || isLoading) ? '#9CA3AF' : 'white'}
+            color={!sessionId.trim() || isLoading ? '#9CA3AF' : 'white'}
           />
-          <Text style={[styles.searchButtonText, (!sessionId.trim() || isLoading) && styles.searchButtonTextDisabled]}>
+          <Text
+            style={[
+              styles.searchButtonText,
+              (!sessionId.trim() || isLoading) && styles.searchButtonTextDisabled,
+            ]}
+          >
             조회
           </Text>
         </TouchableOpacity>

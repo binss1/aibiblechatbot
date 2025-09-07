@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
@@ -12,8 +12,8 @@ import { BookOpen, Heart, MessageCircle, SendIcon, Clock } from 'lucide-react';
 import History from './History';
 import { cn } from '@/lib/utils';
 
-type Message = { 
-  role: 'user' | 'assistant'; 
+type Message = {
+  role: 'user' | 'assistant';
   content: string;
   verses?: Array<{ book: string; chapter: string; verse: string }>;
   prayer?: string;
@@ -37,7 +37,7 @@ function MessageLoading() {
   return (
     <div className="flex items-center space-x-1">
       {[1, 2, 3].map((dot) => (
-        <div 
+        <div
           key={dot}
           className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"
           style={{ animationDelay: `${dot * 0.15}s` }}
@@ -79,14 +79,18 @@ export default function Chat() {
         role: 'assistant',
         content: data.content,
         verses: (data.verses || []) as Array<{ book: string; chapter: string; verse: string }>,
-        prayer: data.prayer
+        prayer: data.prayer,
       };
       setMessages((prev) => [...prev, newMessage]);
     } catch (e: any) {
       // map 429 cooldown if present
       const msg = e instanceof Error ? e.message : '오류가 발생했습니다';
       const body = (() => {
-        try { return JSON.parse(e.message); } catch { return undefined; }
+        try {
+          return JSON.parse(e.message);
+        } catch {
+          return undefined;
+        }
       })();
       if (body?.retryAfterMs) setCooldownMs(body.retryAfterMs);
       setMessages((prev) => [...prev, { role: 'assistant', content: `에러: ${msg}` }]);
@@ -94,7 +98,7 @@ export default function Chat() {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey && canSend) {
+    if (e.key === 'Enter' && !e.shiftKey && canSend) {
       e.preventDefault();
       onSend();
     }
@@ -124,33 +128,30 @@ export default function Chat() {
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-md">
                 <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-                  "요즘 너무 지쳐요. 성경적 위로가 필요해요."
+                  &ldquo;요즘 너무 지쳐요. 성경적 위로가 필요해요.&rdquo;
                 </div>
                 <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-                  "하나님의 뜻을 어떻게 알 수 있을까요?"
+                  &ldquo;하나님의 뜻을 어떻게 알 수 있을까요?&rdquo;
                 </div>
               </div>
             </div>
           ) : (
             <div className="space-y-6">
               {messages.map((message, idx) => (
-                <div 
-                  key={idx} 
-                  className={cn(
-                    "flex",
-                    message.role === 'user' ? "justify-end" : "justify-start"
-                  )}
+                <div
+                  key={idx}
+                  className={cn('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}
                 >
                   {message.role === 'assistant' && (
                     <Avatar className="h-8 w-8 mr-2 mt-1">
                       <AvatarFallback className="bg-blue-100 text-blue-600">AI</AvatarFallback>
                     </Avatar>
                   )}
-                  
-                  <div 
+
+                  <div
                     className={cn(
-                      "max-w-[85%] flex flex-col",
-                      message.role === 'user' ? "items-end" : "items-start"
+                      'max-w-[85%] flex flex-col',
+                      message.role === 'user' ? 'items-end' : 'items-start',
                     )}
                   >
                     {message.role === 'user' ? (
@@ -168,25 +169,33 @@ export default function Chat() {
                             <div className="whitespace-pre-wrap mb-3 text-foreground leading-relaxed">
                               {message.content}
                             </div>
-                            
+
                             {message.verses && message.verses.length > 0 && (
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {message.verses.map((verse, idx) => (
-                                  <Badge key={idx} variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100">
+                                  <Badge
+                                    key={idx}
+                                    variant="secondary"
+                                    className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                                  >
                                     <BookOpen className="w-3 h-3 mr-1" />
                                     {verse.book} {verse.chapter}:{verse.verse}
                                   </Badge>
                                 ))}
                               </div>
                             )}
-                            
+
                             {message.prayer && (
                               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mt-3">
                                 <div className="flex items-start gap-2">
                                   <Heart className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
                                   <div>
-                                    <div className="text-sm font-medium text-amber-800 mb-1">오늘의 기도</div>
-                                    <div className="text-sm text-amber-700 italic">{message.prayer}</div>
+                                    <div className="text-sm font-medium text-amber-800 mb-1">
+                                      오늘의 기도
+                                    </div>
+                                    <div className="text-sm text-amber-700 italic">
+                                      {message.prayer}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -195,15 +204,17 @@ export default function Chat() {
                         )}
                       </div>
                     )}
-                    
-                    <div className={cn(
-                      "text-xs text-muted-foreground mt-1",
-                      message.role === 'user' ? "text-right" : "text-left"
-                    )}>
+
+                    <div
+                      className={cn(
+                        'text-xs text-muted-foreground mt-1',
+                        message.role === 'user' ? 'text-right' : 'text-left',
+                      )}
+                    >
                       {message.role === 'user' ? '방금 전' : ''}
                     </div>
                   </div>
-                  
+
                   {message.role === 'user' && (
                     <Avatar className="h-8 w-8 ml-2 mt-1">
                       <AvatarFallback className="bg-blue-600 text-white">나</AvatarFallback>
@@ -215,7 +226,7 @@ export default function Chat() {
             </div>
           )}
         </div>
-        
+
         {messages.length > 0 && (
           <div className="px-4 py-3 border-t border-border/10 bg-muted/30">
             <History sessionId={sessionId} />
@@ -238,8 +249,8 @@ export default function Chat() {
             </div>
           )}
         </div>
-        <Button 
-          onClick={onSend} 
+        <Button
+          onClick={onSend}
           disabled={!canSend || cooldownMs > 0}
           className="bg-blue-600 hover:bg-blue-700 text-white px-5 h-12 shadow-sm"
         >

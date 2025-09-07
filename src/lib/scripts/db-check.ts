@@ -18,5 +18,3 @@ main().catch((err) => {
   console.error('db-check failed:', err);
   process.exit(1);
 });
-
-

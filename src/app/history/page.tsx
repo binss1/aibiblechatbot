@@ -1,5 +1,6 @@
-"use client";
+'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import History from '@/features/chat/components/History';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,9 @@ export default function HistoryPage() {
       <div className="w-full max-w-3xl space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-semibold">상담 기록 보기</h1>
-          <a href="/" className="text-sm underline">홈으로</a>
+          <Link href="/" className="text-sm underline">
+            홈으로
+          </Link>
         </div>
 
         <div className="flex items-center gap-2">
@@ -22,7 +25,9 @@ export default function HistoryPage() {
             onChange={(e) => setSessionId(e.target.value)}
             placeholder="세션 ID를 입력하세요 (예: web-1725252525)"
           />
-          <Button onClick={() => setCurrent(sessionId)} disabled={!sessionId.trim()}>불러오기</Button>
+          <Button onClick={() => setCurrent(sessionId)} disabled={!sessionId.trim()}>
+            불러오기
+          </Button>
         </div>
 
         {current ? (
@@ -36,5 +41,3 @@ export default function HistoryPage() {
     </main>
   );
 }
-
-
