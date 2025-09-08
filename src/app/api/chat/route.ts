@@ -32,6 +32,7 @@ async function updateCounselingState(sessionId: string, updates: any) {
   const current = await getCounselingState(sessionId);
   const updated = { ...current, ...updates };
   counselingStates.set(sessionId, updated);
+  console.log('Updated counseling state:', updated);
   return updated;
 }
 
@@ -93,7 +94,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   // Optional mock mode for development without external calls
   if (process.env.MOCK_AI_RESPONSES === '1') {
-    return await handleMockResponse(sessionId, counselingSession, message);
+    return await handleMockResponse(sessionId, counselingState, message);
   }
 
   const openai = new OpenAI({ apiKey });
@@ -137,7 +138,7 @@ async function handleInitialStep(
   counselingState: any
 ) {
   // 초기 고민 저장
-  await updateCounselingState(sessionId, {
+  const updatedState = await updateCounselingState(sessionId, {
     step: 'exploration',
     initialConcern: message,
     questionCount: 0,
@@ -196,6 +197,7 @@ async function handleInitialStep(
   
   // 질문들을 추출하여 저장
   const questions = extractQuestions(content);
+  console.log('Extracted questions:', questions);
   if (questions.length > 0) {
     await updateCounselingState(sessionId, {
       questions: questions,
@@ -482,14 +484,29 @@ async function handleFollowupStep(
 function extractQuestions(text: string): string[] {
   const questions: string[] = [];
   const lines = text.split('\n');
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
-    if (trimmed.match(/^\d+\.\s*[^?]*\?/)) {
-      questions.push(trimmed.replace(/^\d+\.\s*/, ''));
+    // 더 유연한 질문 패턴 매칭
+    if (trimmed.match(/^\d+\.\s*.*\?/) || trimmed.match(/^\d+\.\s*.*나요/) || trimmed.match(/^\d+\.\s*.*까요/)) {
+      const question = trimmed.replace(/^\d+\.\s*/, '').trim();
+      if (question.length > 0) {
+        questions.push(question);
+      }
     }
   }
-  
+
+  // 질문이 추출되지 않으면 기본 질문들 사용
+  if (questions.length === 0) {
+    return [
+      "이 상황이 언제부터 시작되었나요?",
+      "가장 힘든 부분은 무엇인가요?",
+      "주변 사람들의 반응은 어떤가요?",
+      "신앙적으로 어떤 도전을 느끼시나요?",
+      "어떤 변화를 원하시나요?"
+    ];
+  }
+
   return questions;
 }
 
@@ -520,7 +537,7 @@ function extractVersesAndPrayer(text: string) {
 }
 
 // Mock 응답 처리
-async function handleMockResponse(sessionId: string, counselingSession: any, message: string) {
+async function handleMockResponse(sessionId: string, counselingState: any, message: string) {
   const mockVerses = [{ book: '마태복음', chapter: '11', verse: '28' }];
 
   let mockContent = '';
@@ -528,7 +545,7 @@ async function handleMockResponse(sessionId: string, counselingSession: any, mes
   let isQuestionPhase = false;
   let progress = undefined;
 
-  switch (counselingSession.step) {
+  switch (counselingState.step) {
     case 'initial':
       mockContent = '고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요:\n\n1. 이 상황이 언제부터 시작되었나요?\n2. 가장 힘든 부분은 무엇인가요?\n3. 주변 사람들의 반응은 어떤가요?\n4. 신앙적으로 어떤 도전을 느끼시나요?\n5. 어떤 변화를 원하시나요?';
       mockStep = 'exploration';
