@@ -133,7 +133,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       questionCount: state.questionCount + 1
     });
     
-    if (updatedState.questionCount >= 4) {
+    if (updatedState.questionCount >= 5) {
       // 모든 질문 완료 - 종합 분석
       await updateCounselingState(sessionId, { step: 'analysis' });
       
