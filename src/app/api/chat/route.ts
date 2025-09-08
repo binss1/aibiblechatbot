@@ -20,7 +20,9 @@ async function getCounselingState(sessionId: string) {
       step: 'initial',
       questionCount: 0,
       answers: [],
-      isComplete: false
+      isComplete: false,
+      initialConcern: '',
+      questions: []
     });
   }
   return counselingStates.get(sessionId);
@@ -84,6 +86,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   
   // 세션별 상담 상태를 간단하게 관리 (실제로는 Redis나 DB 사용 권장)
   const counselingState = await getCounselingState(sessionId);
+  console.log('Current counseling state:', counselingState);
 
   // Allow switching models via env; default keeps cost low
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
@@ -152,9 +155,9 @@ async function handleInitialStep(
               model,
               temperature: 0.3,
               messages: [
-                {
-                  role: 'system',
-                  content: `당신은 공감 능력이 뛰어난 기독교 상담 챗봇입니다. 
+                            {
+                              role: 'system',
+                              content: `당신은 공감 능력이 뛰어난 기독교 상담 챗봇입니다.
 
 사용자가 고민을 털어놓았습니다. 이제 더 자세한 상담을 위해 4-5개의 구체적인 질문을 생성해야 합니다.
 
@@ -168,14 +171,14 @@ async function handleInitialStep(
 응답 형식:
 "고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요:
 
-1. [첫 번째 질문]
-2. [두 번째 질문]
-3. [세 번째 질문]
-4. [네 번째 질문]
-5. [다섯 번째 질문]
+1. 이 상황이 언제부터 시작되었나요?
+2. 가장 힘든 부분은 무엇인가요?
+3. 주변 사람들의 반응은 어떤가요?
+4. 신앙적으로 어떤 도전을 느끼시나요?
+5. 어떤 변화를 원하시나요?
 
 편하게 답변해 주세요."`,
-                },
+                            },
                 { role: 'user', content: message },
               ],
             },
