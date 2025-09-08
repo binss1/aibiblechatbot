@@ -11,6 +11,28 @@ import { CounselingSessionService } from '@/lib/services/counseling-session';
 
 export const runtime = 'nodejs';
 
+// 간단한 상담 상태 관리 (메모리 기반)
+const counselingStates = new Map<string, any>();
+
+async function getCounselingState(sessionId: string) {
+  if (!counselingStates.has(sessionId)) {
+    counselingStates.set(sessionId, {
+      step: 'initial',
+      questionCount: 0,
+      answers: [],
+      isComplete: false
+    });
+  }
+  return counselingStates.get(sessionId);
+}
+
+async function updateCounselingState(sessionId: string, updates: any) {
+  const current = await getCounselingState(sessionId);
+  const updated = { ...current, ...updates };
+  counselingStates.set(sessionId, updated);
+  return updated;
+}
+
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const forwarded = req.headers.get('x-forwarded-for') ?? '';
   const ip =
@@ -57,16 +79,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   await ChatRecord.create({ sessionId, role: 'user', content: message });
 
-  // 상담 세션 가져오기 또는 생성
-  let counselingSession;
-  try {
-    counselingSession = await CounselingSessionService.getOrCreateSession(sessionId);
-    console.log('Counseling session:', counselingSession);
-  } catch (error) {
-    console.error('Error getting counseling session:', error);
-    // 상담 세션 서비스 오류 시 기본 응답으로 폴백
-    return await handleFallbackResponse(openai, model, sessionId, message);
-  }
+  // 간단한 다단계 상담 시스템 구현
+  const openai = new OpenAI({ apiKey });
+  
+  // 세션별 상담 상태를 간단하게 관리 (실제로는 Redis나 DB 사용 권장)
+  const counselingState = await getCounselingState(sessionId);
 
   // Allow switching models via env; default keeps cost low
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
@@ -80,17 +97,14 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   
   try {
     // 상담 단계에 따른 처리
-    switch (counselingSession.step) {
-      case 'initial':
-        return await handleInitialStep(openai, model, sessionId, message, counselingSession);
-      case 'exploration':
-        return await handleExplorationStep(openai, model, sessionId, message, counselingSession);
-      case 'analysis':
-        return await handleAnalysisStep(openai, model, sessionId, message, counselingSession);
-      case 'followup':
-        return await handleFollowupStep(openai, model, sessionId, message, counselingSession);
-      default:
-        return await handleInitialStep(openai, model, sessionId, message, counselingSession);
+    if (counselingState.step === 'initial') {
+      return await handleInitialStep(openai, model, sessionId, message, counselingState);
+    } else if (counselingState.step === 'exploration') {
+      return await handleExplorationStep(openai, model, sessionId, message, counselingState);
+    } else if (counselingState.step === 'analysis') {
+      return await handleAnalysisStep(openai, model, sessionId, message, counselingState);
+    } else {
+      return await handleFollowupStep(openai, model, sessionId, message, counselingState);
     }
   } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
@@ -117,10 +131,15 @@ async function handleInitialStep(
   model: string,
   sessionId: string,
   message: string,
-  counselingSession: any
+  counselingState: any
 ) {
   // 초기 고민 저장
-  await CounselingSessionService.saveInitialConcern(sessionId, message);
+  await updateCounselingState(sessionId, {
+    step: 'exploration',
+    initialConcern: message,
+    questionCount: 0,
+    answers: []
+  });
 
   const completion = await withCircuitBreaker(() =>
     retryWithBackoff(
@@ -175,7 +194,10 @@ async function handleInitialStep(
   // 질문들을 추출하여 저장
   const questions = extractQuestions(content);
   if (questions.length > 0) {
-    await CounselingSessionService.saveExplorationQuestions(sessionId, questions);
+    await updateCounselingState(sessionId, {
+      questions: questions,
+      totalQuestions: questions.length
+    });
   }
 
   const payload = chatResponseSchema.parse({
@@ -204,20 +226,25 @@ async function handleExplorationStep(
   model: string,
   sessionId: string,
   message: string,
-  counselingSession: any
+  counselingState: any
 ) {
   // 답변 저장
-  const updatedSession = await CounselingSessionService.saveExplorationAnswer(sessionId, message);
-  
-  // 모든 질문에 답변했는지 확인
-  if (updatedSession.step === 'analysis') {
+  const updatedState = await updateCounselingState(sessionId, {
+    answers: [...counselingState.answers, message],
+    questionCount: counselingState.questionCount + 1
+  });
+
+  // 모든 질문에 답변했는지 확인 (4-5개 질문)
+  if (updatedState.questionCount >= 4) {
     // 모든 답변이 완료되었으므로 종합 분석 단계로
-    return await handleAnalysisStep(openai, model, sessionId, message, updatedSession);
+    await updateCounselingState(sessionId, { step: 'analysis' });
+    return await handleAnalysisStep(openai, model, sessionId, message, updatedState);
   }
 
   // 다음 질문 제시
-  const nextQuestionIndex = updatedSession.currentQuestionIndex;
-  const nextQuestion = updatedSession.explorationQuestions[nextQuestionIndex];
+  const nextQuestionIndex = updatedState.questionCount;
+  const questions = updatedState.questions || [];
+  const nextQuestion = questions[nextQuestionIndex] || "이 상황에서 가장 중요한 것은 무엇이라고 생각하시나요?";
 
   const payload = chatResponseSchema.parse({
     content: `감사합니다. 다음 질문에 답변해 주세요:\n\n${nextQuestion}`,
@@ -225,7 +252,7 @@ async function handleExplorationStep(
     prayer: undefined,
     counselingStep: 'exploration',
     isQuestionPhase: true,
-    progress: { current: nextQuestionIndex, total: updatedSession.explorationQuestions.length },
+    progress: { current: nextQuestionIndex, total: questions.length || 5 },
   });
 
   await ChatRecord.create({
@@ -243,12 +270,12 @@ async function handleAnalysisStep(
   model: string,
   sessionId: string,
   message: string,
-  counselingSession: any
+  counselingState: any
 ) {
   // 관련 성경 구절 검색
   const allContent = [
-    counselingSession.initialConcern,
-    ...counselingSession.explorationAnswers
+    counselingState.initialConcern,
+    ...counselingState.answers
   ].join(' ');
   const relevantVerses = await searchRelevantVerses(allContent, 5);
 
@@ -285,10 +312,10 @@ async function handleAnalysisStep(
 성경 구절은 한국어 성경 기준으로 정확한 책명을 사용하세요.
 기도는 간단하고 실용적으로 제시하세요.${versesContext}`,
                 },
-                {
-                  role: 'user',
-                  content: `초기 고민: ${counselingSession.initialConcern}\n\n상세 답변들:\n${counselingSession.explorationAnswers.map((answer: string, index: number) => `${index + 1}. ${answer}`).join('\n')}`,
-                },
+                            {
+                              role: 'user',
+                              content: `초기 고민: ${counselingState.initialConcern}\n\n상세 답변들:\n${counselingState.answers.map((answer: string, index: number) => `${index + 1}. ${answer}`).join('\n')}`,
+                            },
               ],
             },
             { signal: controller.signal as any },
@@ -326,7 +353,10 @@ async function handleAnalysisStep(
   );
 
   // 상담 완료 처리
-  await CounselingSessionService.completeCounseling(sessionId);
+  await updateCounselingState(sessionId, { 
+    step: 'followup', 
+    isComplete: true 
+  });
 
   const payload = chatResponseSchema.parse({
     content: content || '죄송합니다. 잠시 후 다시 시도해주세요.',
@@ -353,7 +383,7 @@ async function handleFollowupStep(
   model: string,
   sessionId: string,
   message: string,
-  counselingSession: any
+  counselingState: any
 ) {
   // 관련 성경 구절 검색
   const relevantVerses = await searchRelevantVerses(message, 3);
