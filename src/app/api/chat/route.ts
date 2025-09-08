@@ -87,6 +87,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // 다단계 상담 시스템
   const state = await getCounselingState(sessionId);
   console.log('Current state:', state);
+  console.log('Message:', message);
 
   if (state.step === 'initial') {
     // 첫 번째 메시지: 첫 번째 질문만 제시
@@ -128,10 +129,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     
   } else if (state.step === 'exploration') {
     // 질문에 대한 답변 수집
+    console.log('Processing exploration step, current questionCount:', state.questionCount);
     const updatedState = await updateCounselingState(sessionId, {
       answers: [...state.answers, message],
       questionCount: state.questionCount + 1
     });
+    console.log('Updated state:', updatedState);
     
     if (updatedState.questionCount >= 5) {
       // 모든 질문 완료 - 종합 분석
