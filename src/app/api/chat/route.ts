@@ -90,7 +90,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   console.log('Message:', message);
 
   if (state.step === 'initial') {
-    // 첫 번째 메시지: 첫 번째 질문만 제시
+    // 첫 번째 메시지: 맞춤형 질문 생성
     await updateCounselingState(sessionId, { 
       step: 'exploration', 
       initialConcern: message,
@@ -98,17 +98,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       answers: []
     });
     
-    const questions = [
-      "이 상황이 언제부터 시작되었나요?",
-      "가장 힘든 부분은 무엇인가요?", 
-      "주변 사람들의 반응은 어떤가요?",
-      "신앙적으로 어떤 도전을 느끼시나요?",
-      "어떤 변화를 원하시나요?"
-    ];
+    // 사용자의 고민에 맞는 맞춤형 질문 생성
+    const customQuestions = await generateCustomQuestions(openai, model, message);
+    await updateCounselingState(sessionId, { questions: customQuestions });
     
-    await updateCounselingState(sessionId, { questions });
-    
-    const content = `고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요.\n\n${questions[0]}`;
+    const content = `고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요.\n\n${customQuestions[0]}`;
     
     const payload = chatResponseSchema.parse({
       content,
@@ -341,6 +335,103 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(payload);
   }
+}
+
+// 사용자의 고민에 맞는 맞춤형 질문 생성
+async function generateCustomQuestions(openai: OpenAI, model: string, userConcern: string): Promise<string[]> {
+  try {
+    const completion = await withCircuitBreaker(() =>
+      retryWithBackoff(
+        async () => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 10000);
+          try {
+            return await openai.chat.completions.create(
+              {
+                model,
+                temperature: 0.7,
+                messages: [
+                  {
+                    role: 'system',
+                    content: `당신은 경험이 풍부한 기독교 상담사입니다. 사용자의 고민을 듣고 더 깊이 있는 상담을 위해 5개의 구체적이고 개인적인 질문을 생성해야 합니다.
+
+질문 생성 규칙:
+1. 사용자의 고민과 직접적으로 관련된 질문이어야 함
+2. 감정적, 상황적, 관계적, 신앙적 측면을 고려
+3. 구체적이고 개인적인 질문이어야 함
+4. 상담을 통해 더 깊은 이해를 얻을 수 있는 질문
+5. 한국어로 자연스럽게 작성
+6. 각 질문은 한 줄로 간결하게 작성
+
+응답 형식:
+1. [첫 번째 질문]
+2. [두 번째 질문]
+3. [세 번째 질문]
+4. [네 번째 질문]
+5. [다섯 번째 질문]`,
+                  },
+                  {
+                    role: 'user',
+                    content: `사용자의 고민: "${userConcern}"`,
+                  },
+                ],
+              },
+              { signal: controller.signal as any },
+            );
+          } finally {
+            clearTimeout(timeout);
+          }
+        },
+        { retries: 2, baseMs: 500 },
+      ),
+    );
+
+    const content = completion.choices[0]?.message?.content ?? '';
+    const questions = extractQuestionsFromResponse(content);
+    
+    // 질문이 5개 미만이면 기본 질문으로 보완
+    if (questions.length < 5) {
+      const defaultQuestions = [
+        "이 상황이 언제부터 시작되었나요?",
+        "가장 힘든 부분은 무엇인가요?", 
+        "주변 사람들의 반응은 어떤가요?",
+        "신앙적으로 어떤 도전을 느끼시나요?",
+        "어떤 변화를 원하시나요?"
+      ];
+      return [...questions, ...defaultQuestions.slice(questions.length)].slice(0, 5);
+    }
+    
+    return questions.slice(0, 5);
+  } catch (error) {
+    console.error('Custom questions generation failed:', error);
+    // 실패 시 기본 질문 사용
+    return [
+      "이 상황이 언제부터 시작되었나요?",
+      "가장 힘든 부분은 무엇인가요?", 
+      "주변 사람들의 반응은 어떤가요?",
+      "신앙적으로 어떤 도전을 느끼시나요?",
+      "어떤 변화를 원하시나요?"
+    ];
+  }
+}
+
+// AI 응답에서 질문들을 추출하는 함수
+function extractQuestionsFromResponse(text: string): string[] {
+  const questions: string[] = [];
+  const lines = text.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // 번호가 있는 질문 패턴 매칭
+    if (trimmed.match(/^\d+\.\s*.*/) && (trimmed.includes('?') || trimmed.includes('나요') || trimmed.includes('까요'))) {
+      const question = trimmed.replace(/^\d+\.\s*/, '').trim();
+      if (question.length > 0) {
+        questions.push(question);
+      }
+    }
+  }
+
+  return questions;
 }
 
 // AI 응답에서 구절과 기도를 추출하는 로직
