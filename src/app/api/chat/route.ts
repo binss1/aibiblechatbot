@@ -283,27 +283,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   const openai = new OpenAI({ apiKey });
   
-  try {
-    // 새로운 다단계 상담 시스템 사용
-    console.log('Using new multi-step counseling system');
-    return await handleMultiStepCounseling(openai, model, sessionId, message);
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Chat API Error:', errorMessage);
-    
-    // Fallback to mock if allowed
-    if (process.env.MOCK_AI_RESPONSES === '1') {
-      const mock = {
-        content: '현재 모델 연결이 원활하지 않습니다. 임시 응답을 제공합니다.',
-        verses: [],
-        prayer: undefined,
-        mocked: true,
-      };
-      await ChatRecord.create({ sessionId, role: 'assistant', content: mock.content });
-      return NextResponse.json(mock, { status: 200 });
-    }
-    return NextResponse.json({ message: `OpenAI error: ${errorMessage}` }, { status: 502 });
-  }
+  // 새로운 다단계 상담 시스템 사용
+  console.log('Using new multi-step counseling system');
+  return await handleMultiStepCounseling(openai, model, sessionId, message);
 }
 
 // 초기 단계: 고민 접수 및 탐색 질문 생성
