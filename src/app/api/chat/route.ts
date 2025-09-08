@@ -89,7 +89,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   console.log('Current state:', state);
 
   if (state.step === 'initial') {
-    // 첫 번째 메시지: 질문 생성
+    // 첫 번째 메시지: 첫 번째 질문만 제시
     await updateCounselingState(sessionId, { 
       step: 'exploration', 
       initialConcern: message,
@@ -107,7 +107,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     
     await updateCounselingState(sessionId, { questions });
     
-    const content = `고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요:\n\n1. ${questions[0]}\n2. ${questions[1]}\n3. ${questions[2]}\n4. ${questions[3]}\n5. ${questions[4]}\n\n편하게 답변해 주세요.`;
+    const content = `고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요.\n\n${questions[0]}`;
     
     const payload = chatResponseSchema.parse({
       content,
