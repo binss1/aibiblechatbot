@@ -2,12 +2,12 @@ import { ChatRequest, ChatResponse } from '../types';
 
 // 환경에 따른 API URL 설정
 const getApiBaseUrl = () => {
-  if (__DEV__) {
-    // 개발 환경에서는 컴퓨터의 IP 주소 사용
+  // 개발 환경에서는 로컬 서버 사용
+  if (__DEV__ && false) { // false로 설정하여 항상 프로덕션 사용
     return 'http://192.168.0.10:3000';
   }
-  // 프로덕션 환경에서는 배포된 URL 사용
-  return 'https://your-domain.railway.app';
+  // 프로덕션 환경에서는 Vercel 배포 버전 사용
+  return 'https://aibiblechatbot.vercel.app';
 };
 
 const API_BASE_URL = getApiBaseUrl();

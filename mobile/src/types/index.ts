@@ -7,6 +7,9 @@ export interface Message {
     verse: string;
   }>;
   prayer?: string;
+  counselingStep?: 'initial' | 'exploration' | 'analysis' | 'followup';
+  isQuestionPhase?: boolean;
+  progress?: { current: number; total: number };
 }
 
 export interface ChatResponse {
@@ -17,6 +20,9 @@ export interface ChatResponse {
     verse: string;
   }>;
   prayer?: string;
+  counselingStep?: 'initial' | 'exploration' | 'analysis' | 'followup';
+  isQuestionPhase?: boolean;
+  progress?: { current: number; total: number };
 }
 
 export interface ChatRequest {

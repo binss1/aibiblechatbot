@@ -89,6 +89,36 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
         )}
 
         <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
+          {/* 상담 진행 상황 표시 */}
+          {!isUser && item.isQuestionPhase && item.progress && (
+            <View style={styles.progressContainer}>
+              <View style={styles.progressHeader}>
+                <Ionicons name="help-circle" size={16} color="#3B82F6" />
+                <Text style={styles.progressText}>
+                  상담 진행 중 ({item.progress.current + 1}/{item.progress.total})
+                </Text>
+              </View>
+              <View style={styles.progressBar}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { width: `${((item.progress.current + 1) / item.progress.total) * 100}%` }
+                  ]} 
+                />
+              </View>
+            </View>
+          )}
+
+          {/* 상담 완료 표시 */}
+          {!isUser && item.counselingStep === 'followup' && !item.isQuestionPhase && (
+            <View style={styles.completionContainer}>
+              <View style={styles.completionHeader}>
+                <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+                <Text style={styles.completionText}>상담이 완료되었습니다</Text>
+              </View>
+            </View>
+          )}
+
           <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
             {item.content}
           </Text>
@@ -395,6 +425,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#6B7280',
     textAlign: 'center',
+  },
+  progressContainer: {
+    backgroundColor: '#EBF8FF',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1E40AF',
+    marginLeft: 6,
+  },
+  progressBar: {
+    height: 6,
+    backgroundColor: '#DBEAFE',
+    borderRadius: 3,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#3B82F6',
+    borderRadius: 3,
+  },
+  completionContainer: {
+    backgroundColor: '#ECFDF5',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
+  },
+  completionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  completionText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#065F46',
+    marginLeft: 6,
   },
   inputContainer: {
     paddingHorizontal: 16,

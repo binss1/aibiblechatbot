@@ -34,67 +34,153 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Hero Section with Warm Gradient Background */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-amber-50 to-blue-100">
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-10"></div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      {/* Floating Chat Bubble Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200/30 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
+      </div>
 
-        <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
-          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-12">
-            <div className="flex-1 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 bg-blue-100/80 text-blue-800 px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm border border-blue-200/50">
+      {/* Hero Section with Modern Chat Interface */}
+      <div className="relative z-10">
+        <div className="container mx-auto px-4 py-12 md:py-20">
+          <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+            {/* Left Content */}
+            <div className="flex-1 space-y-8 text-center lg:text-left">
+              <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-sm text-blue-700 px-6 py-3 rounded-full text-sm font-semibold shadow-lg border border-blue-200/50">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <Sparkle className="w-4 h-4" />
-                성경 기반 AI 상담
+                AI 상담사가 온라인입니다
               </div>
 
-              <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
-                당신의 고민에
+              <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-tight">
+                당신의 고민을
                 <br />
-                <span className="text-blue-700 relative">
-                  성경적 답변
-                  <span className="absolute bottom-1 left-0 w-full h-3 bg-blue-100/60 -z-10 rounded-full"></span>
+                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                  성경으로 해결
                 </span>
-                을
+                하세요
               </h1>
 
-              <p className="text-xl text-gray-700 max-w-2xl">
-                30대 이상 직장인·가정을 위한 AI 상담 챗봇. 성경 말씀을 바탕으로 한 따뜻한 조언과
-                기도 제목을 제공합니다.
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                30대 이상 직장인·가정을 위한 전문 AI 상담사가<br />
+                성경 말씀을 바탕으로 개인 맞춤형 조언을 제공합니다.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button
                   size="lg"
-                  className="bg-blue-700 hover:bg-blue-800 text-white px-8 py-6 rounded-xl shadow-md shadow-blue-700/20"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-4 rounded-2xl shadow-xl shadow-blue-500/25 text-lg font-semibold transition-all duration-300 hover:scale-105"
                   onClick={scrollToChat}
                 >
                   <MessageCircle className="w-5 h-5 mr-2" />
-                  지금 상담 시작하기
+                  무료 상담 시작하기
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50 px-8 py-6 rounded-xl"
+                  className="border-2 border-blue-200 text-blue-700 hover:bg-blue-50 px-8 py-4 rounded-2xl text-lg font-semibold backdrop-blur-sm bg-white/50"
                   onClick={() => (window.location.href = '/history')}
                 >
                   <BookOpen className="w-5 h-5 mr-2" />
                   상담 기록 보기
                 </Button>
               </div>
+
+              {/* Trust Indicators */}
+              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Shield className="w-4 h-4 text-green-500" />
+                  <span>100% 익명 보장</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="w-4 h-4 text-blue-500" />
+                  <span>24시간 상담 가능</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  <span>1,000+ 만족한 사용자</span>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 relative">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-blue-900/10 border border-white/50 backdrop-blur-sm bg-white/30">
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5"></div>
-                <div className="w-full h-80 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                  <div className="text-center p-6 bg-white/80 backdrop-blur-md rounded-xl shadow-lg max-w-xs">
-                    <h3 className="text-xl font-semibold text-blue-800">성경적 지혜</h3>
-                    <p className="text-gray-700 mt-2">
-                      &ldquo;내가 네게 지혜의 길을 보이고 정직한 길을 인도하였은즉&rdquo;
-                      <br />
-                      <span className="text-sm">- 잠언 4:11</span>
-                    </p>
+            {/* Right Content - Chat Preview */}
+            <div className="flex-1 max-w-lg">
+              <div className="relative">
+                {/* Chat Window */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/50 overflow-hidden">
+                  {/* Chat Header */}
+                  <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                        <MessageCircle className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-white font-semibold">AI 성경 상담사</h3>
+                        <p className="text-blue-100 text-sm">온라인</p>
+                      </div>
+                      <div className="ml-auto w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    </div>
                   </div>
+
+                  {/* Chat Messages */}
+                  <div className="p-6 space-y-4 h-80 overflow-y-auto">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <MessageCircle className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs">
+                        <p className="text-sm text-gray-800">안녕하세요! 무엇이든 편하게 말씀해주세요. 성경적 관점에서 답변해 드리겠습니다.</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3 justify-end">
+                      <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-xs">
+                        <p className="text-sm">요즘 너무 지쳐요. 성경적 위로가 필요해요.</p>
+                      </div>
+                      <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-white text-xs font-semibold">나</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <MessageCircle className="w-4 h-4 text-blue-600" />
+                      </div>
+                      <div className="bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-xs">
+                        <p className="text-sm text-gray-800">고민을 나눠주셔서 감사합니다. 더 나은 도움을 드리기 위해 몇 가지 질문을 드릴게요...</p>
+                        <div className="mt-2 flex items-center gap-1">
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce"></div>
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                          <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Chat Input */}
+                  <div className="p-4 border-t border-gray-200">
+                    <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
+                      <input 
+                        type="text" 
+                        placeholder="메시지를 입력하세요..." 
+                        className="flex-1 bg-transparent text-sm outline-none"
+                        disabled
+                      />
+                      <button className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                        <ChevronRight className="w-4 h-4 text-white" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Heart className="w-4 h-4 text-white" />
+                </div>
+                <div className="absolute -bottom-4 -left-4 w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center shadow-lg">
+                  <BookOpen className="w-4 h-4 text-white" />
                 </div>
               </div>
             </div>

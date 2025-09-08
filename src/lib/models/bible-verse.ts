@@ -30,3 +30,4 @@ bibleVerseSchema.index({ translation: 1, book: 1, chapter: 1, verse: 1 });
 export const BibleVerse: Model<BibleVerseDocument> =
   (mongoose.models.BibleVerse as Model<BibleVerseDocument>) ||
   mongoose.model<BibleVerseDocument>('BibleVerse', bibleVerseSchema);
+

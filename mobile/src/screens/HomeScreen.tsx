@@ -58,21 +58,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
-        <LinearGradient colors={['#EBF8FF', '#F0F9FF', '#E0F2FE']} style={styles.heroSection}>
+        <LinearGradient colors={['#667eea', '#764ba2']} style={styles.heroSection}>
           <View style={styles.heroContent}>
             <View style={styles.badge}>
-              <Ionicons name="sparkles" size={16} color="#1E40AF" />
-              <Text style={styles.badgeText}>성경 기반 AI 상담</Text>
+              <View style={styles.onlineIndicator} />
+              <Ionicons name="sparkles" size={16} color="#FFFFFF" />
+              <Text style={styles.badgeText}>AI 상담사가 온라인입니다</Text>
             </View>
 
             <Text style={styles.heroTitle}>
-              당신의 고민에{'\n'}
-              <Text style={styles.heroTitleHighlight}>성경적 답변</Text>을
+              당신의 고민을{'\n'}
+              <Text style={styles.heroTitleHighlight}>성경으로 해결</Text>하세요
             </Text>
 
             <Text style={styles.heroDescription}>
-              30대 이상 직장인·가정을 위한 AI 상담 챗봇.{'\n'}
-              성경 말씀을 바탕으로 한 따뜻한 조언과 기도 제목을 제공합니다.
+              30대 이상 직장인·가정을 위한 전문 AI 상담사가{'\n'}
+              성경 말씀을 바탕으로 개인 맞춤형 조언을 제공합니다.
             </Text>
 
             <View style={styles.buttonContainer}>
@@ -81,16 +82,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
                 onPress={() => navigation.navigate('Chat')}
               >
                 <Ionicons name="chatbubbles" size={20} color="white" />
-                <Text style={styles.primaryButtonText}>지금 상담 시작하기</Text>
+                <Text style={styles.primaryButtonText}>무료 상담 시작하기</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.secondaryButton}
                 onPress={() => navigation.navigate('History')}
               >
-                <Ionicons name="book" size={20} color="#3B82F6" />
+                <Ionicons name="book" size={20} color="#FFFFFF" />
                 <Text style={styles.secondaryButtonText}>상담 기록 보기</Text>
               </TouchableOpacity>
+            </View>
+
+            {/* Trust Indicators */}
+            <View style={styles.trustIndicators}>
+              <View style={styles.trustItem}>
+                <Ionicons name="shield-checkmark" size={16} color="#10B981" />
+                <Text style={styles.trustText}>100% 익명 보장</Text>
+              </View>
+              <View style={styles.trustItem}>
+                <Ionicons name="time" size={16} color="#3B82F6" />
+                <Text style={styles.trustText}>24시간 상담 가능</Text>
+              </View>
+              <View style={styles.trustItem}>
+                <Ionicons name="people" size={16} color="#8B5CF6" />
+                <Text style={styles.trustText}>1,000+ 만족한 사용자</Text>
+              </View>
             </View>
           </View>
         </LinearGradient>
@@ -173,33 +190,40 @@ const styles = StyleSheet.create({
   badge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     marginBottom: 20,
+    backdropFilter: 'blur(10px)',
+  },
+  onlineIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#10B981',
+    marginRight: 6,
   },
   badgeText: {
-    color: '#1E40AF',
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
     marginLeft: 6,
   },
   heroTitle: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#1F2937',
+    color: '#FFFFFF',
     textAlign: 'center',
-    lineHeight: 40,
+    lineHeight: 44,
     marginBottom: 16,
   },
   heroTitleHighlight: {
-    color: '#3B82F6',
-    position: 'relative',
+    color: '#FDE047',
   },
   heroDescription: {
     fontSize: 16,
-    color: '#6B7280',
+    color: 'rgba(255, 255, 255, 0.9)',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
@@ -213,18 +237,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
-    shadowColor: '#3B82F6',
+    borderRadius: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   primaryButtonText: {
-    color: 'white',
+    color: '#667eea',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
@@ -235,16 +259,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'transparent',
     borderWidth: 2,
-    borderColor: '#3B82F6',
+    borderColor: '#FFFFFF',
     paddingVertical: 16,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   secondaryButtonText: {
-    color: '#3B82F6',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  trustIndicators: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 16,
+    marginTop: 24,
+  },
+  trustItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  trustText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: 12,
+    fontWeight: '500',
   },
   featuresSection: {
     paddingHorizontal: 20,

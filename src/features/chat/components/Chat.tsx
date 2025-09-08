@@ -2,13 +2,13 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { z } from 'zod';
-import { chatRequestSchema, chatResponseSchema } from '@/features/chat/constants/schema';
+import { chatRequestSchema, chatResponseSchema, CounselingStep } from '@/features/chat/constants/schema';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { BookOpen, Heart, MessageCircle, SendIcon, Clock } from 'lucide-react';
+import { BookOpen, Heart, MessageCircle, SendIcon, Clock, HelpCircle, CheckCircle } from 'lucide-react';
 import History from './History';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +17,9 @@ type Message = {
   content: string;
   verses?: Array<{ book: string; chapter: string; verse: string }>;
   prayer?: string;
+  counselingStep?: CounselingStep;
+  isQuestionPhase?: boolean;
+  progress?: { current: number; total: number };
 };
 
 const request = async (body: z.infer<typeof chatRequestSchema>) => {
@@ -60,6 +63,18 @@ export default function Chat() {
   const [cooldownMs, setCooldownMs] = useState<number>(0);
 
   const canSend = useMemo(() => input.trim().length > 0 && !isPending, [input, isPending]);
+
+  // 현재 상담 단계에 따른 placeholder 텍스트
+  const getPlaceholder = () => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.isQuestionPhase) {
+      return "질문에 답변해 주세요...";
+    }
+    if (lastMessage?.counselingStep === 'followup') {
+      return "추가 질문이나 고민이 있으시면 말씀해 주세요...";
+    }
+    return "고민을 입력하세요...";
+  };
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -105,15 +120,22 @@ export default function Chat() {
   };
 
   return (
-    <Card className="max-w-4xl mx-auto w-full shadow-lg border border-border/30 bg-background/95 backdrop-blur-sm">
-      <CardHeader className="border-b border-border/10 pb-4">
-        <CardTitle className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-          <MessageCircle className="w-6 h-6 text-blue-600" />
-          AI 성경 상담
-        </CardTitle>
-        <p className="text-muted-foreground text-sm text-center">
-          고민을 털어놓으시면 성경 말씀으로 답변드립니다
-        </p>
+    <Card className="max-w-4xl mx-auto w-full shadow-2xl border-0 bg-white/95 backdrop-blur-sm rounded-3xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white border-0 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <CardTitle className="text-xl font-semibold text-white">
+              AI 성경 상담사
+            </CardTitle>
+            <p className="text-blue-100 text-sm">
+              온라인
+            </p>
+          </div>
+          <div className="ml-auto w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="h-[450px] overflow-y-auto p-4 space-y-6">
@@ -155,17 +177,47 @@ export default function Chat() {
                     )}
                   >
                     {message.role === 'user' ? (
-                      <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-sm">
+                      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 shadow-lg">
                         <div className="whitespace-pre-wrap">{message.content}</div>
                       </div>
                     ) : (
-                      <div className="bg-card border border-border/50 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
+                      <div className="bg-gray-100 border-0 rounded-2xl rounded-tl-sm px-4 py-3 shadow-sm">
                         {isPending && idx === messages.length - 1 ? (
                           <div className="py-2 px-1">
                             <MessageLoading />
                           </div>
                         ) : (
                           <>
+                            {/* 상담 진행 상황 표시 */}
+                            {message.isQuestionPhase && message.progress && (
+                              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <HelpCircle className="w-4 h-4 text-blue-600" />
+                                  <span className="text-sm font-medium text-blue-800">
+                                    상담 진행 중 ({message.progress.current + 1}/{message.progress.total})
+                                  </span>
+                                </div>
+                                <div className="w-full bg-blue-200 rounded-full h-2">
+                                  <div 
+                                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                    style={{ width: `${((message.progress.current + 1) / message.progress.total) * 100}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+
+                            {/* 상담 완료 표시 */}
+                            {message.counselingStep === 'followup' && !message.isQuestionPhase && (
+                              <div className="mb-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                  <span className="text-sm font-medium text-green-800">
+                                    상담이 완료되었습니다
+                                  </span>
+                                </div>
+                              </div>
+                            )}
+
                             <div className="whitespace-pre-wrap mb-3 text-foreground leading-relaxed">
                               {message.content}
                             </div>
@@ -233,13 +285,13 @@ export default function Chat() {
           </div>
         )}
       </CardContent>
-      <CardFooter className="border-t border-border/10 p-4 gap-3">
+      <CardFooter className="border-t border-gray-200 p-4 gap-3 bg-gray-50/50">
         <div className="relative flex-1">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="고민을 입력하세요..."
-            className="min-h-12 resize-none pr-12 bg-background border-border/50 focus-visible:ring-blue-500/20"
+            placeholder={getPlaceholder()}
+            className="min-h-12 resize-none pr-12 bg-white border-gray-200 focus-visible:ring-blue-500/20 rounded-2xl"
             onKeyDown={handleKeyDown}
           />
           {cooldownMs > 0 && (
@@ -252,7 +304,7 @@ export default function Chat() {
         <Button
           onClick={onSend}
           disabled={!canSend || cooldownMs > 0}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 h-12 shadow-sm"
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 h-12 shadow-lg rounded-2xl transition-all duration-300 hover:scale-105"
         >
           {isPending ? (
             <div className="flex items-center gap-2">
