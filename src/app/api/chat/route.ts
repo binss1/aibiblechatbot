@@ -88,6 +88,12 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // 세션별 상담 상태를 간단하게 관리 (실제로는 Redis나 DB 사용 권장)
   const counselingState = await getCounselingState(sessionId);
   console.log('Current counseling state:', counselingState);
+  
+  // 강제로 초기 단계로 설정 (디버깅용)
+  if (counselingState.step !== 'initial' && counselingState.step !== 'exploration' && counselingState.step !== 'analysis') {
+    await updateCounselingState(sessionId, { step: 'initial' });
+    counselingState.step = 'initial';
+  }
 
   // Allow switching models via env; default keeps cost low
   const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
@@ -101,13 +107,18 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   
   try {
     // 상담 단계에 따른 처리
+    console.log('Processing step:', counselingState.step);
     if (counselingState.step === 'initial') {
+      console.log('Handling initial step');
       return await handleInitialStep(openai, model, sessionId, message, counselingState);
     } else if (counselingState.step === 'exploration') {
+      console.log('Handling exploration step');
       return await handleExplorationStep(openai, model, sessionId, message, counselingState);
     } else if (counselingState.step === 'analysis') {
+      console.log('Handling analysis step');
       return await handleAnalysisStep(openai, model, sessionId, message, counselingState);
     } else {
+      console.log('Handling followup step');
       return await handleFollowupStep(openai, model, sessionId, message, counselingState);
     }
   } catch (err: unknown) {
