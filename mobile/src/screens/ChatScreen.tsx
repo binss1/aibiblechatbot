@@ -61,6 +61,9 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
         content: response.content,
         verses: response.verses,
         prayer: response.prayer,
+        counselingStep: response.counselingStep,
+        isQuestionPhase: response.isQuestionPhase,
+        progress: response.progress,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -77,94 +80,91 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
     const isLastMessage = index === messages.length - 1;
 
     return (
-      <View
-        style={[styles.messageContainer, isUser ? styles.userMessage : styles.assistantMessage]}
-      >
+      <View style={styles.messageContainer}>
         {!isUser && (
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>AI</Text>
+          <View style={styles.assistantMessage}>
+            <View style={styles.assistantAvatar}>
+              <Text style={styles.assistantAvatarText}>L</Text>
             </View>
+            <View style={styles.assistantBubble}>
+              <Text style={styles.assistantText}>{item.content}</Text>
+              
+              {/* 상담 진행 상황 표시 */}
+              {item.isQuestionPhase && item.progress && (
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressHeader}>
+                    <Ionicons name="help-circle" size={16} color="#7B9EBE" />
+                    <Text style={styles.progressText}>
+                      상담 진행 중 ({item.progress.current + 1}/{item.progress.total})
+                    </Text>
+                  </View>
+                  <View style={styles.progressBar}>
+                    <View 
+                      style={[
+                        styles.progressFill, 
+                        { width: `${((item.progress.current + 1) / item.progress.total) * 100}%` }
+                      ]} 
+                    />
+                  </View>
+                </View>
+              )}
+
+              {/* 상담 완료 표시 */}
+              {item.counselingStep === 'followup' && !item.isQuestionPhase && (
+                <View style={styles.completionContainer}>
+                  <View style={styles.completionHeader}>
+                    <Ionicons name="checkmark-circle" size={16} color="#A3B899" />
+                    <Text style={styles.completionText}>상담이 완료되었습니다</Text>
+                  </View>
+                </View>
+              )}
+
+              {item.verses && item.verses.length > 0 && (
+                <View style={styles.versesContainer}>
+                  {item.verses.map((verse, idx) => (
+                    <View key={idx} style={styles.verseBadge}>
+                      <Ionicons name="bookmark" size={12} color="#A3B899" />
+                      <Text style={styles.verseText}>
+                        {verse.book} {verse.chapter}:{verse.verse}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {item.prayer && (
+                <View style={styles.prayerContainer}>
+                  <View style={styles.prayerHeader}>
+                    <Ionicons name="heart" size={16} color="#A3B899" />
+                    <Text style={styles.prayerTitle}>오늘의 기도</Text>
+                  </View>
+                  <Text style={styles.prayerText}>{item.prayer}</Text>
+                </View>
+              )}
+
+              {isLoading && isLastMessage && (
+                <View style={styles.loadingContainer}>
+                  <View style={styles.loadingDots}>
+                    {[1, 2, 3].map((dot) => (
+                      <View
+                        key={dot}
+                        style={[styles.loadingDot, { animationDelay: `${dot * 0.15}s` }]}
+                      />
+                    ))}
+                  </View>
+                </View>
+              )}
+            </View>
+            <Text style={styles.timestamp}>오후 2:30</Text>
           </View>
         )}
 
-        <View style={[styles.messageBubble, isUser ? styles.userBubble : styles.assistantBubble]}>
-          {/* 상담 진행 상황 표시 */}
-          {!isUser && item.isQuestionPhase && item.progress && (
-            <View style={styles.progressContainer}>
-              <View style={styles.progressHeader}>
-                <Ionicons name="help-circle" size={16} color="#3B82F6" />
-                <Text style={styles.progressText}>
-                  상담 진행 중 ({item.progress.current + 1}/{item.progress.total})
-                </Text>
-              </View>
-              <View style={styles.progressBar}>
-                <View 
-                  style={[
-                    styles.progressFill, 
-                    { width: `${((item.progress.current + 1) / item.progress.total) * 100}%` }
-                  ]} 
-                />
-              </View>
-            </View>
-          )}
-
-          {/* 상담 완료 표시 */}
-          {!isUser && item.counselingStep === 'followup' && !item.isQuestionPhase && (
-            <View style={styles.completionContainer}>
-              <View style={styles.completionHeader}>
-                <Ionicons name="checkmark-circle" size={16} color="#10B981" />
-                <Text style={styles.completionText}>상담이 완료되었습니다</Text>
-              </View>
-            </View>
-          )}
-
-          <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
-            {item.content}
-          </Text>
-
-          {!isUser && item.verses && item.verses.length > 0 && (
-            <View style={styles.versesContainer}>
-              {item.verses.map((verse, idx) => (
-                <View key={idx} style={styles.verseBadge}>
-                  <Ionicons name="book" size={12} color="#3B82F6" />
-                  <Text style={styles.verseText}>
-                    {verse.book} {verse.chapter}:{verse.verse}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          )}
-
-          {!isUser && item.prayer && (
-            <View style={styles.prayerContainer}>
-              <View style={styles.prayerHeader}>
-                <Ionicons name="heart" size={16} color="#F59E0B" />
-                <Text style={styles.prayerTitle}>오늘의 기도</Text>
-              </View>
-              <Text style={styles.prayerText}>{item.prayer}</Text>
-            </View>
-          )}
-
-          {isLoading && isLastMessage && (
-            <View style={styles.loadingContainer}>
-              <View style={styles.loadingDots}>
-                {[1, 2, 3].map((dot) => (
-                  <View
-                    key={dot}
-                    style={[styles.loadingDot, { animationDelay: `${dot * 0.15}s` }]}
-                  />
-                ))}
-              </View>
-            </View>
-          )}
-        </View>
-
         {isUser && (
-          <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, styles.userAvatar]}>
-              <Text style={styles.userAvatarText}>나</Text>
+          <View style={styles.userMessage}>
+            <View style={styles.userBubble}>
+              <Text style={styles.userText}>{item.content}</Text>
             </View>
+            <Text style={styles.timestamp}>오후 2:31</Text>
           </View>
         )}
       </View>
@@ -174,7 +174,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <View style={styles.emptyIcon}>
-        <Ionicons name="heart" size={32} color="#3B82F6" />
+        <Ionicons name="heart" size={32} color="#7B9EBE" />
       </View>
       <Text style={styles.emptyTitle}>안녕하세요!</Text>
       <Text style={styles.emptyDescription}>
@@ -203,6 +203,14 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
         style={styles.keyboardAvoidingView}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <Text style={styles.headerTitle}>로고스</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('History')}>
+            <Ionicons name="time" size={24} color="#343a40" />
+          </TouchableOpacity>
+        </View>
+
         <FlatList
           ref={flatListRef}
           data={messages}
@@ -219,7 +227,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
               style={styles.textInput}
               value={inputText}
               onChangeText={setInputText}
-              placeholder="고민을 입력하세요..."
+              placeholder="메시지를 입력하세요..."
               multiline
               maxLength={1000}
               editable={!isLoading}
@@ -233,7 +241,7 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
               disabled={!inputText.trim() || isLoading}
             >
               <Ionicons
-                name="send"
+                name="arrow-up"
                 size={20}
                 color={!inputText.trim() || isLoading ? '#9CA3AF' : 'white'}
               />
@@ -248,10 +256,25 @@ export default function ChatScreen({ navigation }: ChatScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8F7F4',
   },
   keyboardAvoidingView: {
     flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9ECEF',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#343a40',
   },
   messagesContainer: {
     flexGrow: 1,
@@ -259,98 +282,93 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
   },
   messageContainer: {
-    flexDirection: 'row',
     marginBottom: 16,
-    alignItems: 'flex-end',
-  },
-  userMessage: {
-    justifyContent: 'flex-end',
   },
   assistantMessage: {
-    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    maxWidth: '85%',
   },
-  avatarContainer: {
-    marginHorizontal: 8,
+  userMessage: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+    maxWidth: '85%',
+    alignSelf: 'flex-end',
   },
-  avatar: {
+  assistantAvatar: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#7B9EBE',
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 8,
   },
-  userAvatar: {
-    backgroundColor: '#3B82F6',
-  },
-  avatarText: {
+  assistantAvatarText: {
     color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  userAvatarText: {
-    color: 'white',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  messageBubble: {
-    maxWidth: '80%',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 20,
-  },
-  userBubble: {
-    backgroundColor: '#3B82F6',
-    borderBottomRightRadius: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   assistantBubble: {
-    backgroundColor: 'white',
+    backgroundColor: '#7B9EBE',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 16,
     borderBottomLeftRadius: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    flex: 1,
   },
-  messageText: {
+  userBubble: {
+    backgroundColor: '#E9ECEF',
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    borderRadius: 16,
+    borderBottomRightRadius: 4,
+  },
+  assistantText: {
+    color: 'white',
     fontSize: 16,
     lineHeight: 22,
   },
   userText: {
-    color: 'white',
+    color: '#343a40',
+    fontSize: 16,
+    lineHeight: 22,
   },
-  assistantText: {
-    color: '#1F2937',
+  timestamp: {
+    fontSize: 12,
+    color: '#6c757d',
+    marginHorizontal: 8,
+    marginTop: 4,
   },
   versesContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
     marginTop: 8,
-    gap: 6,
   },
   verseBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EBF8FF',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
+    backgroundColor: 'rgba(163, 184, 153, 0.3)',
+    borderLeftWidth: 4,
+    borderLeftColor: '#A3B899',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+    position: 'relative',
   },
   verseText: {
-    fontSize: 12,
-    color: '#3B82F6',
-    marginLeft: 4,
-    fontWeight: '500',
+    fontSize: 14,
+    color: '#343a40',
+    fontStyle: 'italic',
+    lineHeight: 20,
   },
   prayerContainer: {
-    backgroundColor: '#FEF3C7',
-    borderWidth: 1,
-    borderColor: '#FDE68A',
-    borderRadius: 12,
-    padding: 12,
+    backgroundColor: 'rgba(163, 184, 153, 0.3)',
+    borderLeftWidth: 4,
+    borderLeftColor: '#A3B899',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
     marginTop: 8,
+    position: 'relative',
   },
   prayerHeader: {
     flexDirection: 'row',
@@ -360,12 +378,12 @@ const styles = StyleSheet.create({
   prayerTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#92400E',
+    color: '#343a40',
     marginLeft: 6,
   },
   prayerText: {
     fontSize: 14,
-    color: '#92400E',
+    color: '#343a40',
     fontStyle: 'italic',
     lineHeight: 20,
   },
@@ -380,8 +398,56 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#7B9EBE',
     marginHorizontal: 2,
+  },
+  progressContainer: {
+    backgroundColor: 'rgba(163, 184, 153, 0.3)',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#A3B899',
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  progressText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#343a40',
+    marginLeft: 6,
+  },
+  progressBar: {
+    height: 4,
+    backgroundColor: 'rgba(163, 184, 153, 0.2)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#A3B899',
+    borderRadius: 2,
+  },
+  completionContainer: {
+    backgroundColor: 'rgba(163, 184, 153, 0.3)',
+    borderRadius: 8,
+    padding: 8,
+    marginTop: 8,
+    borderLeftWidth: 4,
+    borderLeftColor: '#A3B899',
+  },
+  completionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  completionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#343a40',
+    marginLeft: 6,
   },
   emptyState: {
     flex: 1,
@@ -393,7 +459,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#EBF8FF',
+    backgroundColor: 'rgba(123, 158, 190, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -401,12 +467,12 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#343a40',
     marginBottom: 8,
   },
   emptyDescription: {
     fontSize: 16,
-    color: '#6B7280',
+    color: '#6c757d',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 24,
@@ -416,85 +482,35 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   examplePrompt: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: 'rgba(233, 236, 239, 0.5)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
   },
   examplePromptText: {
     fontSize: 14,
-    color: '#6B7280',
+    color: '#6c757d',
     textAlign: 'center',
   },
-  progressContainer: {
-    backgroundColor: '#EBF8FF',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#BFDBFE',
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1E40AF',
-    marginLeft: 6,
-  },
-  progressBar: {
-    height: 6,
-    backgroundColor: '#DBEAFE',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#3B82F6',
-    borderRadius: 3,
-  },
-  completionContainer: {
-    backgroundColor: '#ECFDF5',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
-  },
-  completionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  completionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#065F46',
-    marginLeft: 6,
-  },
   inputContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: 'white',
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
     borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#E9ECEF',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#E9ECEF',
     borderRadius: 24,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
   },
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1F2937',
+    color: '#343a40',
     maxHeight: 100,
     paddingVertical: 8,
   },
@@ -502,12 +518,12 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#3B82F6',
+    backgroundColor: '#A3B899',
     alignItems: 'center',
     justifyContent: 'center',
     marginLeft: 8,
   },
   sendButtonDisabled: {
-    backgroundColor: '#E5E7EB',
+    backgroundColor: '#E9ECEF',
   },
 });

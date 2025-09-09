@@ -31,3 +31,4 @@ export const BibleVerse: Model<BibleVerseDocument> =
   (mongoose.models.BibleVerse as Model<BibleVerseDocument>) ||
   mongoose.model<BibleVerseDocument>('BibleVerse', bibleVerseSchema);
 
+
