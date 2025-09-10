@@ -101,7 +101,10 @@ export default function Chat({ onBack }: ChatProps) {
         prayer: data.prayer,
         counselingStep: data.counselingStep,
         isQuestionPhase: data.isQuestionPhase,
-        progress: data.progress,
+        progress: data.progress && typeof data.progress.current === 'number' && typeof data.progress.total === 'number' ? {
+          current: data.progress.current,
+          total: data.progress.total
+        } : undefined,
       };
       setMessages((prev) => [...prev, newMessage]);
     } catch (e: any) {
