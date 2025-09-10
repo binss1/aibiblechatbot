@@ -32,3 +32,4 @@ export const BibleVerse: Model<BibleVerseDocument> =
   mongoose.model<BibleVerseDocument>('BibleVerse', bibleVerseSchema);
 
 
+

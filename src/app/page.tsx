@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { MessageCircle, Heart, Shield, Users, Star, ArrowRight, CheckCircle, BookOpen, Psychology, VerifiedUser } from 'lucide-react';
+import { MessageCircle, Heart, Shield, Users, Star, ArrowRight, CheckCircle, BookOpen, Brain, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -89,7 +89,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col gap-4 rounded-xl border border-[#324d67] bg-[#192633] p-6 text-center items-center transform hover:-translate-y-2 transition-transform duration-300">
               <div className="bg-[#1172d4]/20 p-3 rounded-full mb-4">
-                <Psychology className="w-9 h-9 text-[#1172d4]" />
+                <Brain className="w-9 h-9 text-[#1172d4]" />
               </div>
               <h3 className="text-white text-xl font-bold leading-tight">개인 맞춤형 상담</h3>
               <p className="text-[#92adc9] text-base font-normal leading-relaxed">
@@ -98,7 +98,7 @@ export default function HomePage() {
             </div>
             <div className="flex flex-col gap-4 rounded-xl border border-[#324d67] bg-[#192633] p-6 text-center items-center transform hover:-translate-y-2 transition-transform duration-300">
               <div className="bg-[#1172d4]/20 p-3 rounded-full mb-4">
-                <VerifiedUser className="w-9 h-9 text-[#1172d4]" />
+                <UserCheck className="w-9 h-9 text-[#1172d4]" />
               </div>
               <h3 className="text-white text-xl font-bold leading-tight">안전 및 기밀 보장</h3>
               <p className="text-[#92adc9] text-base font-normal leading-relaxed">
